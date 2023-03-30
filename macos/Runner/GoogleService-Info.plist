@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>171530435946-ip9fu7l0cqk4o13cha9pp26ouad0t0it.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.171530435946-ip9fu7l0cqk4o13cha9pp26ouad0t0it</string>
+	<key>API_KEY</key>
+	<string>AIzaSyD02YSEsR3HLwm8pbN4fdulK5tVf-g9Vh4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>171530435946</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.baldyDashApp</string>
+	<key>PROJECT_ID</key>
+	<string>quest-baldy-dash</string>
+	<key>STORAGE_BUCKET</key>
+	<string>quest-baldy-dash.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:171530435946:ios:88b7c4f688cc7d2c957913</string>
+</dict>
+</plist>
