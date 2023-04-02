@@ -14,7 +14,10 @@ dependencies:
 
   flutter_chat_ui: ^1.6.6
   intl: ^0.17.0
+  path_provider: ^2.0.14
   provider: ^6.0.5
+  shared_preferences: ^2.0.20
+  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_test:

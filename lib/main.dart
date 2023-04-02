@@ -1,28 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'firebase_options.dart';
 
 import 'app.dart';
-import 'model/app_state_model.dart';                 // NEW
+import 'service/service_registry.dart';                 // NEW
 
 void main() async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  var db = FirebaseFirestore.instance;
-  final user = <String, dynamic> {
-    "first": "Ada",
-    "last": "LoveLace"
-  };
-  var races = db.collection("races");
-  var id = races.id;
-  races.add(user).then((DocumentReference doc) => print('Snapshot added: ${doc.path}'));
+  await ServiceRegistry.bootstrap();
+  print('Loaded settings: ${ServiceRegistry.I.settings.uuid}');
 
   return runApp(
-    ChangeNotifierProvider<AppStateModel>(            // NEW
-      create: (_) => AppStateModel(), // NEW
+    ChangeNotifierProvider<ServiceRegistry>(            // NEW
+      create: (_) => ServiceRegistry.I, // NEW
       child: const BaldyDashApp(),               // NEW
     ),
   );
