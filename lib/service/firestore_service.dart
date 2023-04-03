@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../model/race.dart';
+import '../model/types.dart' as types;
 
 class FirestoreService {
   static FirestoreService? _instance;
@@ -37,16 +39,24 @@ class FirestoreService {
     if (!snapshot.exists) {
       return "Error! Race is missing.";
     }
-
-    var name = snapshot.get("name");
-
-    var snapshots = _db
-        .collection("races")
-        .doc("vtGu6oxrs1uTYvb919VZ")
-        .collection("sessions")
-        .snapshots();
-    var data = snapshot.data()!;
-
     return snapshot.get("name");
+  }
+
+  Future<types.Race> getRace(String id) async {
+    final DocumentSnapshot doc = await _db.collection("races").doc(id).get();
+    if (!doc.exists) {
+      throw Exception("The race with document id $id does not exist.");
+    }
+
+    final data = doc.data()! as Map<String, Object?>;
+
+    var sessions = await doc.reference.collection("sessions").get();
+    sessions.docs.forEach((element) {print("Session doc: ${element.data()}");});
+    // sessions.snapshots().forEach((element) {
+    //   element.docs.forEach((element) {
+    //     print("id ${element.id} with data ${element.data()!}");});});
+    print("Sessions: $sessions");
+
+    return types.Race.fromJson(data);
   }
 }

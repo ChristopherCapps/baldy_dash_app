@@ -2,6 +2,8 @@ import 'package:baldy_dash_app/service/service_registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'model/types.dart';
+
 class BaldyDashApp extends StatelessWidget {
   const BaldyDashApp({super.key});
 
@@ -24,16 +26,17 @@ class BaldyDashApp extends StatelessWidget {
               // Convert each item into a widget based on the type of item it is.
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: FutureBuilder<String>(
-                    future: ServiceRegistry.I.firestoreService.getRaceName(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<String> snapshot) {
+                  title: FutureBuilder<Race>(
+                    future: ServiceRegistry.I.firestoreService
+                        .getRace('vtGu6oxrs1uTYvb919VZ'),
+                    builder:
+                        (BuildContext context, AsyncSnapshot<Race> snapshot) {
                       if (snapshot.hasError) {
                         return const Text("Failed to fetch race data");
                       }
 
                       if (snapshot.connectionState == ConnectionState.done) {
-                        return Text(snapshot.data!);
+                        return Text(snapshot.data!.name);
                       }
 
                       return const Text("Loading...");
