@@ -21,19 +21,19 @@ class Message {
 
 class Player {
   final String uuid;
-  final String? friendlyName;
+  final String? name;
 
-  Player({required this.uuid, this.friendlyName});
+  Player({required this.uuid, this.name});
 
   Player.fromJson(Map<String, Object?> json)
       : this(
     uuid: json['uuid']! as String,
-    friendlyName: json['friendlyName'] as String,
+    name: json['name'] as String,
   );
 
   Map<String, Object?> toJson() => {
     'uuid': uuid,
-    'friendlyName': friendlyName,
+    'name': name,
   };
 }
 

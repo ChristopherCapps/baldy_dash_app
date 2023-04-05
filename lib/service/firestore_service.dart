@@ -42,21 +42,79 @@ class FirestoreService {
     return snapshot.get("name");
   }
 
-  Future<types.Race> getRace(String id) async {
+  types.Message getMessage(
+      final QueryDocumentSnapshot<Map<String, Object?>> messageDoc) {
+    return types.Message(
+      authorUuid: messageDoc.get("authorUuid"),
+      text: messageDoc.get("text"),
+      imageUrl: messageDoc.get("imageUrl"),
+    );
+  }
+
+  types.Player getPlayer(
+      final QueryDocumentSnapshot<Map<String, Object?>> playerDoc) {
+    return types.Player(
+      name: playerDoc.get("name"),
+      uuid: playerDoc.get("uuid"),
+    );
+  }
+
+  Future<types.Crew> getCrew(
+      final QueryDocumentSnapshot<Map<String, Object?>> crewDoc) async {
+    final players = await crewDoc.reference
+        .collection("players")
+        .get()
+        .then((playersRef) =>
+            playersRef.docs.map((playerDoc) => getPlayer(playerDoc)));
+
+    final messages = await crewDoc.reference
+        .collection("transcript")
+        .get()
+        .then((transcriptRef) =>
+            transcriptRef.docs.map((messageDoc) => getMessage(messageDoc)));
+
+    return types.Crew(
+      name: crewDoc.get("name"),
+      players: players.toList(),
+      transcript: messages.toList(),
+    );
+  }
+
+  Future<types.Session> getSession(
+      final QueryDocumentSnapshot<Map<String, Object?>> sessionDoc) async {
+    final crewsRef = await sessionDoc.reference
+        .collection("crews")
+        .get();
+
+    List<types.Crew> crews = [];
+    for (var crewRef in crewsRef.docs) {
+      crews = crews + [await getCrew(crewRef)];
+    }
+
+    return types.Session(
+      name: sessionDoc.get("name"),
+      startTime: sessionDoc.get("startTime"),
+      crews: crews.toList(),
+    );
+  }
+
+  Future<types.Race> getRace(final String id) async {
     final DocumentSnapshot doc = await _db.collection("races").doc(id).get();
     if (!doc.exists) {
       throw Exception("The race with document id $id does not exist.");
     }
 
-    final data = doc.data()! as Map<String, Object?>;
+    final sessionsRef = await doc.reference.collection("sessions").get();
 
-    var sessions = await doc.reference.collection("sessions").get();
-    sessions.docs.forEach((element) {print("Session doc: ${element.data()}");});
-    // sessions.snapshots().forEach((element) {
-    //   element.docs.forEach((element) {
-    //     print("id ${element.id} with data ${element.data()!}");});});
-    print("Sessions: $sessions");
+    List<types.Session> sessions = [];
+    for (var sessionRef in sessionsRef.docs) {
+      sessions = sessions + [await getSession(sessionRef)];
+    }
 
-    return types.Race.fromJson(data);
+    return types.Race(
+      name: doc.get("name"),
+      logoUrl: doc.get("logoUrl"),
+      sessions: sessions,
+    );
   }
 }
