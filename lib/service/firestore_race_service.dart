@@ -7,6 +7,8 @@ import '../model/message.dart';
 import '../model/crew.dart';
 import 'race_service.dart';
 
+// TODO: Need to refactor and delegate to a repo
+
 class FirestoreRaceService implements RaceService {
   static FirestoreRaceService? _instance;
 

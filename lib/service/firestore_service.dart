@@ -1,9 +1,5 @@
-import 'dart:io';
-
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../model/types.dart' as types;
+import 'package:firebase_core/firebase_core.dart';
 
 class FirestoreService {
   static FirestoreService? _instance;
@@ -16,7 +12,7 @@ class FirestoreService {
 
   static Future<FirestoreService> init(FirebaseOptions firebaseOptions) async {
     if (FirestoreService._instance != null) {
-      throw Exception("Already initialized");
+      throw Exception('Already initialized');
     }
     await Firebase.initializeApp(
       options: firebaseOptions,

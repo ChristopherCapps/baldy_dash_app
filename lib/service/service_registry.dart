@@ -23,7 +23,7 @@ class ServiceRegistry extends foundation.ChangeNotifier {
 
   static Future<ServiceRegistry> bootstrap() async {
     if (ServiceRegistry._instance != null) {
-      throw Exception("Already bootstrapped");
+      throw Exception('Already bootstrapped');
     }
     return Settings.create().then(
       (settingsF) =>
