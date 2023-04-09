@@ -8,15 +8,15 @@ part 'message.g.dart';
 @immutable
 class Message extends Equatable {
   final String authorId;
-  final DateTime sentTime;
+  final DateTime timestamp;
   final String text;
-  final String? imageUrl;
+  final String? photoUrl;
 
   const Message(
       {required this.authorId,
-      required this.sentTime,
+      required this.timestamp,
       required this.text,
-      this.imageUrl});
+      this.photoUrl});
 
   factory Message.fromJson(Map<String, dynamic> json) =>
       _$MessageFromJson(json);

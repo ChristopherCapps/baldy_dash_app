@@ -54,8 +54,19 @@ class FirestoreRaceService implements RaceService {
       );
 
   @override
-  List<Session> getSessions(Race race) {
-    // TODO: implement getSessions
-    throw UnimplementedError();
-  }
+  Stream<List<Session>> getSessions(Race race) => _db
+      .collection('races')
+      .doc(race.id)
+      .collection('sessions')
+      .snapshots()
+      .map(
+        (snapshot) => snapshot.docs.fold<List<Session>>(
+          [],
+          (listOfSessions, doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return [...listOfSessions, Session.fromJson(data)];
+          },
+        ),
+      );
 }

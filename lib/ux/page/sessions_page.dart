@@ -1,35 +1,35 @@
 import 'package:flutter/material.dart';
 
 import '../../model/race.dart';
+import '../../model/session.dart';
 import '../../service/race_service.dart';
-import '../page/sessions_page.dart';
 import '../widget/error_message_widget.dart';
 import '../widget/loading_widget.dart';
 
-class RacesPage extends StatelessWidget {
+class SessionsPage extends StatelessWidget {
+  final Race race;
   final RaceService raceService;
 
-  const RacesPage({super.key, required this.raceService});
+  const SessionsPage(
+      {super.key, required this.raceService, required this.race});
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Lobby')),
+        appBar: AppBar(title: Text(race.name)),
         body: Container(
           padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 35.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: racesWidget(),
-              ),
+              sessionsWidget(),
             ],
           ),
         ),
       );
 
-  StreamBuilder<List<Race>> racesWidget() => StreamBuilder<List<Race>>(
-        stream: raceService.getRaces(),
+  StreamBuilder<List<Session>> sessionsWidget() => StreamBuilder<List<Session>>(
+        stream: raceService.getSessions(race),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return ErrorMessageWidget.withDefaults(
@@ -38,9 +38,9 @@ class RacesPage extends StatelessWidget {
           if (!snapshot.hasData) {
             return const LoadingWidget();
           }
-          final races = snapshot.data!;
-          if (races.isEmpty) {
-            return const Text('No races are available');
+          final sessions = snapshot.data!;
+          if (sessions.isEmpty) {
+            return const Text('No sessions are available for this race.');
           }
           return Column(
             children: [
@@ -48,9 +48,9 @@ class RacesPage extends StatelessWidget {
               //Image.network(defaultRaceUrl, fit: BoxFit.contain),
               Expanded(
                 child: ListView.builder(
-                  itemCount: races.length,
+                  itemCount: sessions.length,
                   itemBuilder: (context, index) =>
-                      raceListTile(context, races[index]),
+                      sessionListTile(context, sessions[index]),
                 ),
               ),
             ],
@@ -58,17 +58,16 @@ class RacesPage extends StatelessWidget {
         },
       );
 
-  ListTile raceListTile(BuildContext context, Race race) {
-    print('Render race: $race');
+  ListTile sessionListTile(BuildContext context, Session session) {
+    print('Render session: $session');
     return ListTile(
-      enabled: race.available,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) =>
-              SessionsPage(raceService: raceService, race: race),
-        ),
-      ),
-      title: Text(race.name),
+      // enabled: session.available,
+      // onTap: () => Navigator.of(context).push(
+      //   MaterialPageRoute(
+      //     builder: (context) => SessionsPage(race: race),
+      //   ),
+      // ),
+      title: Text(session.name),
       subtitle: Text(race.tagline ?? 'The adventure awaits!'),
       leading: raceLogo(race),
       trailing: race.available
@@ -101,7 +100,7 @@ class RacesPage extends StatelessWidget {
             //   ),
             // ),
             Text(
-              'Select the race you\'d like to run.',
+              'Select an available session to join.',
               style: TextStyle(
                 fontSize: 14,
                 fontStyle: FontStyle.italic,

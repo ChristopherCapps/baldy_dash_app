@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class Settings {
-  static const _uuid = "uuid";
+  static const _uuid = 'uuid';
 
   final SharedPreferences _prefs;
 
@@ -15,7 +15,7 @@ class Settings {
   String get uuid => _prefs.getString(_uuid)!;
 
   static Future<Settings> create() async {
-    var settings = await SharedPreferences.getInstance()
+    final settings = await SharedPreferences.getInstance()
         .then((prefs) => Settings._(prefs));
 
     return settings;
