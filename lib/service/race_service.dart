@@ -10,7 +10,7 @@ abstract class RaceService {
 
   Stream<List<Session>> getSessions(Race race);
 
-  List<Crew> getCrews(Session session);
+  Stream<List<Crew>> getCrews(Session session);
 
   List<Player> getPlayers(Crew crew);
 

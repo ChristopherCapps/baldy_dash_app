@@ -8,7 +8,7 @@ environment:
   sdk: '>=2.19.3 <3.0.0'
 
 dependencies:
-  cloud_firestore: ^4.4.5
+  cloud_firestore: ^4.5.0
   equatable: ^2.0.5
   flutter:
     sdk: flutter

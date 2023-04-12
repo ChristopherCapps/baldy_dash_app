@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../model/session.dart';
-import '../model/race.dart';
-import '../model/player.dart';
-import '../model/message.dart';
 import '../model/crew.dart';
+import '../model/message.dart';
+import '../model/player.dart';
+import '../model/race.dart';
+import '../model/session.dart';
 import 'race_service.dart';
 
 // TODO: Need to refactor and delegate to a repo
@@ -24,21 +24,19 @@ class FirestoreRaceService implements RaceService {
   static FirestoreRaceService get I => FirestoreRaceService._instance!;
 
   @override
-  Stream<List<Crew>> getCrews(final Race race, final Session session) {
-    getSession(race, session).then((session) => _db
-        .collection('races/${race.id}/sessions/${session.id}/crews')
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs.fold<List<Crew>>(
-            [],
-            (listOfCrews, doc) {
-              final data = doc.data();
-              data['id'] = doc.id;
-              return [...listOfCrews, Crew.fromJson(data)];
-            },
-          ),
-        ));
-  }
+  Stream<List<Crew>> getCrews(final Race race, final Session session) => _db
+      .collection('races/${race.id}/sessions/${session.id}/crews')
+      .snapshots()
+      .map(
+        (snapshot) => snapshot.docs.fold<List<Crew>>(
+          [],
+          (listOfCrews, doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return [...listOfCrews, Crew.fromJson(data)];
+          },
+        ),
+      );
 
   @override
   List<Message> getMessages({required Crew crew, int? maxMessages}) {
@@ -64,8 +62,8 @@ class FirestoreRaceService implements RaceService {
         ),
       );
 
-  Future<Session> getSession(final Race race, final Session session) => _db
-      .doc('races/${race.id}/sessions/${session.id}')
+  Future<Session> _getSession(final Race race, final String sessionId) => _db
+      .doc('races/${race.id}/sessions/$sessionId')
       .get()
       .then((snapshot) => Session.fromJson(snapshot.data()!));
 
