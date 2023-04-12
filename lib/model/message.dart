@@ -24,7 +24,7 @@ class Message extends Equatable {
   Map<String, Object?> toJson() => _$MessageToJson(this);
 
   @override
-  List<Object> get props => ['authorId', 'sentTime', 'text', 'imageUrl'];
+  List<Object> get props => ['authorId', 'timestamp', 'text', 'photoUrl'];
 
   @override
   bool get stringify => true;

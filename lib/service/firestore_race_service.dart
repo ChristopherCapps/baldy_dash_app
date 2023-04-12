@@ -24,9 +24,20 @@ class FirestoreRaceService implements RaceService {
   static FirestoreRaceService get I => FirestoreRaceService._instance!;
 
   @override
-  List<Crew> getCrews(Session session) {
-    // TODO: implement getCrews
-    throw UnimplementedError();
+  Stream<List<Crew>> getCrews(final Race race, final Session session) {
+    getSession(race, session).then((session) => _db
+        .collection('races/${race.id}/sessions/${session.id}/crews')
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs.fold<List<Crew>>(
+            [],
+            (listOfCrews, doc) {
+              final data = doc.data();
+              data['id'] = doc.id;
+              return [...listOfCrews, Crew.fromJson(data)];
+            },
+          ),
+        ));
   }
 
   @override
@@ -53,8 +64,13 @@ class FirestoreRaceService implements RaceService {
         ),
       );
 
+  Future<Session> getSession(final Race race, final Session session) => _db
+      .doc('races/${race.id}/sessions/${session.id}')
+      .get()
+      .then((snapshot) => Session.fromJson(snapshot.data()!));
+
   @override
-  Stream<List<Session>> getSessions(Race race) => _db
+  Stream<List<Session>> getSessions(final Race race) => _db
       .collection('races')
       .doc(race.id)
       .collection('sessions')
