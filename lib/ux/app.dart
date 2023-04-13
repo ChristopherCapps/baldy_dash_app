@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'service/service_registry.dart';
-import 'ux/page/races_page.dart';
+import '../service/service_registry.dart';
+import 'page/races_page.dart';
 
 class BaldyDashApp extends StatelessWidget {
   const BaldyDashApp({super.key});

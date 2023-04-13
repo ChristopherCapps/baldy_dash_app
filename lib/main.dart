@@ -6,10 +6,11 @@ import 'service/service_registry.dart'; // NEW
 import 'ux/app.dart';
 
 void main() async {
-  await ServiceRegistry.bootstrap();
-  print('Loaded settings: ${ServiceRegistry.I.settings.uuid}');
+  final serviceRegistry = await ServiceRegistry.bootstrap();
+  print('Loaded settings: ${serviceRegistry.settings.uuid}');
 
-  initializeEngine();
+  final engine = await initializeEngine();
+  print('Initialized engine with player ${engine.player}');
 
   return runApp(
     ChangeNotifierProvider<ServiceRegistry>(
@@ -20,9 +21,7 @@ void main() async {
   );
 }
 
-void initializeEngine() {
-  Engine.initialize(
-    ServiceRegistry.I.settings,
-    ServiceRegistry.I.raceService,
-  );
-}
+Future<Engine> initializeEngine() async => await Engine.initialize(
+      ServiceRegistry.I.settings,
+      ServiceRegistry.I.raceService,
+    );

@@ -91,6 +91,12 @@ class FirestoreRaceService implements RaceService {
                 (documents, doc) {
                   final data = doc.data();
                   data['id'] = doc.id;
+                  for (final key in data.keys) {
+                    final value = data[key];
+                    if (value is Timestamp) {
+                      data[key] = value.toDate().toIso8601String();
+                    }
+                  }
                   return [...documents, jsonFactoryFn(data)];
                 },
               ));

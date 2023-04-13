@@ -42,16 +42,14 @@ class SessionsPage extends StatelessWidget {
           if (sessions.isEmpty) {
             return const Text('No sessions are available for this race.');
           }
+          // return Text("Test");
           return Column(
             children: [
               banner(),
-              //Image.network(defaultRaceUrl, fit: BoxFit.contain),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: sessions.length,
-                  itemBuilder: (context, index) =>
-                      sessionListTile(context, sessions[index]),
-                ),
+              ListView.builder(
+                itemCount: sessions.length,
+                itemBuilder: (context, index) =>
+                    sessionListTile(context, sessions[index]),
               ),
             ],
           );
@@ -69,13 +67,6 @@ class SessionsPage extends StatelessWidget {
       // ),
       title: Text(session.name),
       subtitle: Text(race.tagline ?? 'The adventure awaits!'),
-      leading: raceLogo(race),
-      trailing: race.available
-          ? const Icon(
-              Icons.verified,
-              color: Colors.green,
-            )
-          : null,
     );
   }
 

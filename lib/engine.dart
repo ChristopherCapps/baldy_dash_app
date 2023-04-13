@@ -3,6 +3,8 @@ import 'service/race_service.dart';
 import 'service/settings.dart';
 
 class Engine {
+  static Engine? _instance;
+
   static Future<Engine> initialize(
       final Settings settings, final RaceService raceService) async {
     final playerId = settings.uuid;
@@ -15,10 +17,14 @@ class Engine {
           ),
         );
 
-    return Engine._(player);
+    _instance = Engine._(player);
+
+    return _instance!;
   }
 
   Player player;
 
   Engine._(this.player);
+
+  static Engine get I => _instance!;
 }
