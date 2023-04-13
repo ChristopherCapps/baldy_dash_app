@@ -14,10 +14,8 @@ class Settings {
 
   String get uuid => _prefs.getString(_uuid)!;
 
-  static Future<Settings> create() async {
-    final settings = await SharedPreferences.getInstance()
-        .then((prefs) => Settings._(prefs));
-
-    return settings;
-  }
+  static Future<Settings> create() async =>
+      await SharedPreferences.getInstance().then(
+        Settings._,
+      );
 }

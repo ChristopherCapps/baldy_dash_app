@@ -1,5 +1,4 @@
 import '../model/crew.dart';
-import '../model/message.dart';
 import '../model/player.dart';
 import '../model/race.dart';
 import '../model/session.dart';
@@ -10,13 +9,13 @@ abstract class RaceService {
 
   Stream<List<Session>> getSessions(Race race);
 
-  Stream<List<Crew>> getCrews(Session session);
+  Stream<List<Crew>> getCrews(Race race, Session session);
 
-  List<Player> getPlayers(Crew crew);
+  Future<Player?> getPlayer(String id);
 
-  List<Message> getMessages({required Crew crew, int? maxMessages});
+  Stream<List<Waypoint>> getWaypoints(Race race);
 
-  Stream<Waypoint> getWaypoints(Race race, Session session);
+  Future<Player> create(Player player);
 
-  String sendMessage(String text);
+  void update(Player player);
 }

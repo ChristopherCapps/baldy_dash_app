@@ -25,7 +25,7 @@ class Race extends Equatable {
   Map<String, Object?> toJson() => _$RaceToJson(this);
 
   @override
-  List<Object> get props => ['name', 'tagline', 'logoUrl', 'available'];
+  List<Object?> get props => [name, tagline, logoUrl, available];
 
   @override
   bool get stringify => true;

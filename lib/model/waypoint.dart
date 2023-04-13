@@ -9,13 +9,15 @@ part 'waypoint.g.dart';
 class Waypoint extends Equatable {
   final int id;
   final String clue;
-  final String answers;
+  final List<String> answers;
+  final String? region;
   final String? imageUrl;
 
   const Waypoint(
       {required this.id,
       required this.clue,
       required this.answers,
+      this.region,
       this.imageUrl});
 
   factory Waypoint.fromJson(Map<String, dynamic> json) =>
@@ -24,7 +26,7 @@ class Waypoint extends Equatable {
   Map<String, Object?> toJson() => _$WaypointToJson(this);
 
   @override
-  List<Object> get props => ['id', 'clue', 'answers', 'imageUrl'];
+  List<Object?> get props => [id, clue, answers, region, imageUrl];
 
   @override
   bool get stringify => true;

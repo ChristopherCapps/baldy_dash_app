@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/crew.dart';
-import '../model/message.dart';
 import '../model/player.dart';
 import '../model/race.dart';
 import '../model/session.dart';
+import '../model/waypoint.dart';
 import 'race_service.dart';
 
-// TODO: Need to refactor and delegate to a repo
+typedef JsonFactoryFunction<T> = T Function(Map<String, dynamic> json);
+typedef JsonSerializationFunction<T> = Map<String, dynamic> Function(T entity);
 
 class FirestoreRaceService implements RaceService {
   static FirestoreRaceService? _instance;
@@ -24,63 +25,73 @@ class FirestoreRaceService implements RaceService {
   static FirestoreRaceService get I => FirestoreRaceService._instance!;
 
   @override
-  Stream<List<Crew>> getCrews(final Race race, final Session session) => _db
-      .collection('races/${race.id}/sessions/${session.id}/crews')
-      .snapshots()
-      .map(
-        (snapshot) => snapshot.docs.fold<List<Crew>>(
-          [],
-          (listOfCrews, doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return [...listOfCrews, Crew.fromJson(data)];
-          },
-        ),
-      );
+  Stream<List<Race>> getRaces() => _getCollection('races', Race.fromJson);
 
   @override
-  List<Message> getMessages({required Crew crew, int? maxMessages}) {
-    // TODO: implement getMessages
-    throw UnimplementedError();
+  Stream<List<Waypoint>> getWaypoints(final Race race) =>
+      _getCollection('races/${race.id}/waypoints', Waypoint.fromJson);
+
+  @override
+  Stream<List<Session>> getSessions(final Race race) =>
+      _getCollection('races/${race.id}/sessions', Session.fromJson);
+
+  @override
+  Stream<List<Crew>> getCrews(final Race race, final Session session) =>
+      _getCollection(
+          'races/${race.id}/sessions/${session.id}/crews', Crew.fromJson);
+
+  @override
+  Future<Player?> getPlayer(final String id) =>
+      _getDocument('players/$id', Player.fromJson);
+
+  @override
+  Future<Player> create(final Player player) async =>
+      await _create('players/${player.id}', player, Player.toJson);
+
+  @override
+  void update(final Player player) async {
+    _update('players/${player.id}', player, Player.toJson);
   }
 
-  @override
-  List<Player> getPlayers(Crew crew) {
-    // TODO: implement getPlayers
-    throw UnimplementedError();
+  Future<T> _create<T>(final String path, T entity,
+      JsonSerializationFunction<T> serializationFn) async {
+    await _db.doc(path).set(serializationFn(entity));
+    return entity;
   }
 
-  @override
-  Stream<List<Race>> getRaces() => _db.collection('races').snapshots().map(
-        (snapshot) => snapshot.docs.fold<List<Race>>(
-          [],
-          (listOfRaces, doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return [...listOfRaces, Race.fromJson(data)];
-          },
-        ),
-      );
+  void _update<T>(final String path, T entity,
+      JsonSerializationFunction<T> serializationFn) async {
+    final documentReference = _db.doc(path);
+    await _db.runTransaction(
+      (transaction) async {
+        final snapshot = await transaction.get(documentReference);
+        if (!snapshot.exists) {
+          throw Exception('Entity at path $path does not exist');
+        }
+        transaction.update(documentReference, serializationFn(entity));
+      },
+    ).catchError(
+      // ignore: avoid_print, invalid_return_type_for_catch_error
+      (error) => print('Failed to update entity: $error'),
+    );
+  }
 
-  Future<Session> _getSession(final Race race, final String sessionId) => _db
-      .doc('races/${race.id}/sessions/$sessionId')
-      .get()
-      .then((snapshot) => Session.fromJson(snapshot.data()!));
+  Future<T?> _getDocument<T>(
+          final String path, JsonFactoryFunction<T> jsonFactoryFn) async =>
+      _db.doc(path).get().then((snapshot) =>
+          snapshot.exists ? jsonFactoryFn(snapshot.data()!) : null);
 
-  @override
-  Stream<List<Session>> getSessions(final Race race) => _db
-      .collection('races')
-      .doc(race.id)
-      .collection('sessions')
-      .snapshots()
-      .map(
-        (snapshot) => snapshot.docs.fold<List<Session>>(
-          [],
-          (listOfSessions, doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return [...listOfSessions, Session.fromJson(data)];
-          },
-        ),
-      );
+  Stream<List<T>> _getCollection<T>(
+          final String path, JsonFactoryFunction<T> jsonFactoryFn) =>
+      _db
+          .collection(path)
+          .snapshots()
+          .map((snapshot) => snapshot.docs.fold<List<T>>(
+                [],
+                (documents, doc) {
+                  final data = doc.data();
+                  data['id'] = doc.id;
+                  return [...documents, jsonFactoryFn(data)];
+                },
+              ));
 }
