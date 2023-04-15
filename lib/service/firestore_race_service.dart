@@ -45,6 +45,18 @@ class FirestoreRaceService implements RaceService {
       _getDocument('players/$id', Player.fromJson);
 
   @override
+  Stream<Crew> getCrew(
+          final Race race, final Session session, final Crew crew) =>
+      _db
+          .doc('race/${race.id}/sessions/${session.id}/crews/${crew.id}')
+          .snapshots()
+          .map((snapshot) => Crew.fromJson(snapshot.data()!));
+
+  Stream<List<String>> getPlayersForCrew(
+          final Race race, final Session session, final Crew crew) =>
+      getCrew(race, session, crew).map((snapshot) => snapshot.players);
+
+  @override
   Future<Player> create(final Player player) async =>
       await _create('players/${player.id}', player, Player.toJson);
 

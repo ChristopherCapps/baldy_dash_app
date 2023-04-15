@@ -69,7 +69,7 @@ class RacesPage extends StatelessWidget {
         ),
       ),
       title: Text(race.name),
-      subtitle: Text(race.tagline ?? 'The adventure awaits!'),
+      subtitle: Text(race.tagLineOrDefault),
       leading: raceLogo(race),
       trailing: race.available
           ? const Icon(

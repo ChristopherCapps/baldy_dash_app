@@ -10,6 +10,7 @@ class Session extends Equatable {
   final SessionState state;
   final String id;
   final String name;
+  final String? tagLine;
   final String? passkey;
   final DateTime? startTime;
   final DateTime? completedTime;
@@ -18,6 +19,7 @@ class Session extends Equatable {
       {required this.id,
       required this.name,
       required this.state,
+      this.tagLine,
       this.passkey,
       this.startTime,
       this.completedTime});
@@ -26,6 +28,9 @@ class Session extends Equatable {
       _$SessionFromJson(json);
 
   Map<String, Object?> toJson() => _$SessionToJson(this);
+
+  String get tagLineOrDefault =>
+      tagLine ?? 'The most fun you\'ll ever have in a golf cart!';
 
   @override
   List<Object?> get props => [name, state, passkey, startTime, completedTime];

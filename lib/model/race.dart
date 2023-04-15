@@ -9,23 +9,25 @@ part 'race.g.dart';
 class Race extends Equatable {
   final String id;
   final String name;
-  final String? tagline;
+  final String? tagLine;
   final String? logoUrl;
   final bool available;
 
   const Race(
       {required this.id,
       required this.name,
-      this.tagline,
+      this.tagLine,
       this.logoUrl,
       this.available = false});
+
+  String get tagLineOrDefault => tagLine ?? 'The adventure awaits!';
 
   factory Race.fromJson(Map<String, dynamic> json) => _$RaceFromJson(json);
 
   Map<String, Object?> toJson() => _$RaceToJson(this);
 
   @override
-  List<Object?> get props => [name, tagline, logoUrl, available];
+  List<Object?> get props => [name, tagLine, logoUrl, available];
 
   @override
   bool get stringify => true;

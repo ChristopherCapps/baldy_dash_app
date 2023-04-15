@@ -11,6 +11,8 @@ abstract class RaceService {
 
   Stream<List<Crew>> getCrews(Race race, Session session);
 
+  Stream<Crew> getCrew(final Race race, final Session session, final Crew crew);
+
   Future<Player?> getPlayer(String id);
 
   Stream<List<Waypoint>> getWaypoints(Race race);

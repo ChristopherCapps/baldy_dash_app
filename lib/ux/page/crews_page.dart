@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 
+import '../../model/crew.dart';
 import '../../model/race.dart';
 import '../../model/session.dart';
 import '../../service/race_service.dart';
 import '../widget/error_message_widget.dart';
 import '../widget/loading_widget.dart';
-import 'crews_page.dart';
 
-class SessionsPage extends StatelessWidget {
+class CrewsPage extends StatelessWidget {
   final Race race;
+  final Session session;
   final RaceService raceService;
 
-  const SessionsPage(
-      {super.key, required this.raceService, required this.race});
+  const CrewsPage(
+      {super.key,
+      required this.raceService,
+      required this.race,
+      required this.session});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -20,7 +24,7 @@ class SessionsPage extends StatelessWidget {
           title: Column(
             children: [
               Text(race.name),
-              Text(race.tagLineOrDefault,
+              Text(session.name,
                   style: const TextStyle(
                     fontSize: 12,
                   )),
@@ -34,15 +38,15 @@ class SessionsPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: sessionsWidget(),
+                child: crewsWidget(),
               ),
             ],
           ),
         ),
       );
 
-  StreamBuilder<List<Session>> sessionsWidget() => StreamBuilder<List<Session>>(
-        stream: raceService.getSessions(race),
+  StreamBuilder<List<Crew>> crewsWidget() => StreamBuilder<List<Crew>>(
+        stream: raceService.getCrews(race, session),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return ErrorMessageWidget.withDefaults(
@@ -51,9 +55,9 @@ class SessionsPage extends StatelessWidget {
           if (!snapshot.hasData) {
             return const LoadingWidget();
           }
-          final sessions = snapshot.data!;
-          if (sessions.isEmpty) {
-            return const Text('No sessions are available for this race.');
+          final crews = snapshot.data!;
+          if (crews.isEmpty) {
+            return const Text('No crews are available for this race.');
           }
           // return Text("Test");
           return Column(
@@ -61,9 +65,9 @@ class SessionsPage extends StatelessWidget {
               banner(),
               Expanded(
                 child: ListView.builder(
-                  itemCount: sessions.length,
+                  itemCount: crews.length,
                   itemBuilder: (context, index) =>
-                      sessionListTile(context, sessions[index]),
+                      crewListTile(context, crews[index]),
                 ),
               ),
             ],
@@ -71,22 +75,24 @@ class SessionsPage extends StatelessWidget {
         },
       );
 
-  ListTile sessionListTile(BuildContext context, Session session) {
-    print('Render session: $session');
-    return ListTile(
-      //enabled: true,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CrewsPage(
-            raceService: raceService,
-            race: race,
-            session: session,
-          ),
+  StreamBuilder crewListTile(BuildContext context, Crew crew) {
+    print('Render crew: $crew');
+    return StreamBuilder<Future<String>>(
+      stream: _getPlayersForCrew(crew),
+      builder: (_, futurePlayersList) => FutureBuilder<String>(
+        future: futurePlayersList.data,
+        builder: (_, playersList) => ListTile(
+          // enabled: session.available,
+          // onTap: () => Navigator.of(context).push(
+          //   MaterialPageRoute(
+          //     builder: (context) => SessionsPage(race: race),
+          //   ),
+          // ),
+          title: Text(crew.name),
+          subtitle: Text(playersList.data ?? ''),
+          //trailing: const Text('PENDING'),
         ),
       ),
-      title: Text(session.name),
-      subtitle: Text(session.tagLineOrDefault),
-      trailing: const Text('PENDING'),
     );
   }
 
@@ -102,7 +108,7 @@ class SessionsPage extends StatelessWidget {
             //   ),
             // ),
             Text(
-              'Select an available session to join.',
+              'Select a crew to join.',
               style: TextStyle(
                 fontSize: 14,
                 fontStyle: FontStyle.italic,
@@ -111,4 +117,14 @@ class SessionsPage extends StatelessWidget {
           ],
         ),
       );
+
+  Stream<Future<String>> _getPlayersForCrew(final Crew crew) =>
+      raceService.getCrew(race, session, crew).map(
+            (crew) => crew.players.fold(Future(() => ''),
+                (futureListOfPlayerNames, playerId) async {
+              final player = await raceService.getPlayer(playerId);
+              final listOfNames = await futureListOfPlayerNames;
+              return '$listOfNames, ${player!.name!}';
+            }),
+          );
 }
