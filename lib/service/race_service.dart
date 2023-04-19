@@ -7,11 +7,11 @@ import '../model/waypoint.dart';
 abstract class RaceService {
   Stream<List<Race>> getRaces();
 
-  Stream<Race> getRace(String raceId);
+  Future<Race> getRaceById(String raceId);
 
   Stream<List<Session>> getSessions(Race race);
 
-  Stream<Session> getSession(Race race, Session session);
+  Future<Session> getSessionById(String raceId, String sessionId);
 
   Stream<List<Crew>> getCrews(Race race, Session session);
 

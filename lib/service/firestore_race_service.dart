@@ -63,10 +63,11 @@ class FirestoreRaceService implements RaceService {
   Stream<List<Race>> getRaces() => _getCollection(_racesPath(), Race.fromJson);
 
   @override
-  Stream<Race> getRaceById(final String raceId) => _getDocument(
+  Future<Race> getRaceById(final String raceId) async => await _getDocument(
         _racePath(raceId),
         Race.fromJson,
       );
+
   @override
   Stream<List<Waypoint>> getWaypoints(final Race race) =>
       _getCollection(_waypointsPath(race.id), Waypoint.fromJson);

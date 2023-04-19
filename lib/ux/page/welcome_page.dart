@@ -51,6 +51,7 @@ class WelcomePage extends StatelessWidget {
               Expanded(
                 child: Text('We\'re glad to see you again, ${player.name}.'),
               ),
+              textNotificationForInProgressSession(player),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => _racesPage(player)),
@@ -106,4 +107,11 @@ class WelcomePage extends StatelessWidget {
           ),
         ),
       );
+      
+        textNotificationForInProgressSession(final Player player) {
+          if (player.sessionId != null) {
+            final session = raceService.getSessions
+            return Text('It appears that you\'re already running in a race')
+          }
+        }
 }
