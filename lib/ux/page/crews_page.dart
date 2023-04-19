@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../model/crew.dart';
+import '../../model/player.dart';
 import '../../model/race.dart';
 import '../../model/session.dart';
 import '../../service/race_service.dart';
@@ -76,23 +77,31 @@ class CrewsPage extends StatelessWidget {
       );
 
   StreamBuilder crewListTile(BuildContext context, Crew crew) {
-    print('Render crew: $crew');
-    return StreamBuilder<Future<String>>(
-      stream: _getPlayersForCrew(crew),
-      builder: (_, futurePlayersList) => FutureBuilder<String>(
-        future: futurePlayersList.data,
-        builder: (_, playersList) => ListTile(
-          // enabled: session.available,
-          // onTap: () => Navigator.of(context).push(
-          //   MaterialPageRoute(
-          //     builder: (context) => SessionsPage(race: race),
-          //   ),
-          // ),
-          title: Text(crew.name),
-          subtitle: Text(playersList.data ?? ''),
-          //trailing: const Text('PENDING'),
-        ),
-      ),
+    debugPrint('Render crew: $crew');
+    return StreamBuilder<Crew>(
+      stream: raceService.getCrew(race, session, crew),
+      builder: (_, crew) {
+        if (crew.connectionState == ConnectionState.done ||
+            crew.connectionState == ConnectionState.active) {
+          return FutureBuilder<List<Player>>(
+            future: raceService.getPlayers(crew.data!),
+            builder: (_, players) => ListTile(
+              // enabled: session.available,
+              // onTap: () => Navigator.of(context).push(
+              //   MaterialPageRoute(
+              //     builder: (context) => SessionsPage(race: race),
+              //   ),
+              // ),
+              title: Text(crew.data?.name ?? 'Loading...'),
+              subtitle: Text(
+                  players.hasData ? getListOfPlayerNames(players.data!) : ''),
+              //trailing: const Text('PENDING'),
+            ),
+          );
+        } else {
+          return const Text('Loading...');
+        }
+      },
     );
   }
 
@@ -118,13 +127,15 @@ class CrewsPage extends StatelessWidget {
         ),
       );
 
-  Stream<Future<String>> _getPlayersForCrew(final Crew crew) =>
-      raceService.getCrew(race, session, crew).map(
-            (crew) => crew.players.fold(Future(() => ''),
-                (futureListOfPlayerNames, playerId) async {
-              final player = await raceService.getPlayer(playerId);
-              final listOfNames = await futureListOfPlayerNames;
-              return '$listOfNames, ${player!.name!}';
-            }),
-          );
+  String getListOfPlayerNames(final List<Player> players) {
+    if (players.isEmpty) {
+      return 'Nobody has joined';
+    } else if (players.length == 1) {
+      return '${players[0].name} is the only member so far';
+    } else if (players.length == 2) {
+      return 'Just ${players[0].name} and ${players[1].name} so far';
+    } else {
+      return '${players.sublist(0, players.length - 1).map((player) => player.name).join(', ')} and ${players.reversed.first.name}';
+    }
+  }
 }

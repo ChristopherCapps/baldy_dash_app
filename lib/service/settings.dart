@@ -12,7 +12,10 @@ class Settings {
     }
   }
 
-  String get uuid => _prefs.getString(_uuid)!;
+  String get uuid =>
+      //'1';
+      'f2b9b4b0-d993-11ed-83f3-e7422e01ce10';
+  //_prefs.getString(_uuid)!;
 
   static Future<Settings> create() async =>
       await SharedPreferences.getInstance().then(

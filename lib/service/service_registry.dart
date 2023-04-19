@@ -1,6 +1,6 @@
-import 'package:baldy_dash_app/firebase_options.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
+import '../firebase_options.dart';
 import 'firestore_race_service.dart';
 import 'firestore_service.dart';
 import 'race_service.dart';
@@ -26,12 +26,18 @@ class ServiceRegistry extends foundation.ChangeNotifier {
       throw Exception('Already bootstrapped');
     }
     return Settings.create().then(
-      (settingsF) =>
-          FirestoreService.init(DefaultFirebaseOptions.currentPlatform).then(
-        (firestoreService) =>
-            FirestoreRaceService.init(firestoreService.database).then(
+      (settingsF) => FirestoreService.init(
+        DefaultFirebaseOptions.currentPlatform,
+      ).then(
+        (firestoreService) => FirestoreRaceService.init(
+          firestoreService.database,
+          settingsF.uuid,
+        ).then(
           (firestoreRaceService) => ServiceRegistry._(
-              settingsF, firestoreService, firestoreRaceService),
+            settingsF,
+            firestoreService,
+            firestoreRaceService,
+          ),
         ),
       ),
     );

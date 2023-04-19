@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../service/service_registry.dart';
-import 'page/races_page.dart';
+import '../../service/service_registry.dart';
+import 'page/welcome_page.dart';
 
 class BaldyDashApp extends StatelessWidget {
   const BaldyDashApp({super.key});
@@ -15,7 +15,11 @@ class BaldyDashApp extends StatelessWidget {
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
     return MaterialApp(
-      home: RacesPage(raceService: ServiceRegistry.I.raceService),
+      home: _welcomePage(),
     );
   }
+
+  WelcomePage _welcomePage() => WelcomePage(
+        ServiceRegistry.I.raceService,
+      );
 }

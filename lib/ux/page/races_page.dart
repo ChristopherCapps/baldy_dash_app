@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../engine.dart';
 import '../../model/race.dart';
 import '../../service/race_service.dart';
 import '../page/sessions_page.dart';
@@ -8,8 +9,13 @@ import '../widget/loading_widget.dart';
 
 class RacesPage extends StatelessWidget {
   final RaceService raceService;
+  final Engine engine;
 
-  const RacesPage({super.key, required this.raceService});
+  const RacesPage({
+    super.key,
+    required this.raceService,
+    required this.engine,
+  });
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -45,7 +51,6 @@ class RacesPage extends StatelessWidget {
           return Column(
             children: [
               banner(),
-              //Image.network(defaultRaceUrl, fit: BoxFit.contain),
               Expanded(
                 child: ListView.builder(
                   itemCount: races.length,

@@ -1,30 +1,19 @@
 import 'model/player.dart';
-import 'service/race_service.dart';
-import 'service/settings.dart';
 
 class Engine {
   static Engine? _instance;
 
-  static Future<Engine> initialize(
-      final Settings settings, final RaceService raceService) async {
-    final playerId = settings.uuid;
-
-    final player = await (raceService.getPlayer(playerId)) ??
-        await raceService.create(
-          Player(
-            id: playerId,
-            role: Role.participant,
-          ),
-        );
-
+  static Engine initialize(final Player player) {
     _instance = Engine._(player);
 
     return _instance!;
   }
 
-  Player player;
+  final Player _player;
 
-  Engine._(this.player);
+  Engine._(this._player);
+
+  Player get player => _player;
 
   static Engine get I => _instance!;
 }
