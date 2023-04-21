@@ -73,6 +73,13 @@ class FirestoreRaceService implements RaceService {
       _getCollection(_waypointsPath(race.id), Waypoint.fromJson);
 
   @override
+  Future<Session> getSessionById(String raceId, String sessionId) async =>
+      await _getDocument(
+        _sessionPath(raceId, sessionId),
+        Session.fromJson,
+      );
+
+  @override
   Stream<List<Session>> getSessions(final Race race) =>
       _getCollection(_sessionsPath(race.id), Session.fromJson);
 
@@ -140,10 +147,12 @@ class FirestoreRaceService implements RaceService {
     );
   }
 
-  Future<T?> _getDocument<T>(
+  Future<T> _getDocument<T>(
           final String path, JsonFactoryFunction<T> jsonFactoryFn) async =>
-      _db.doc(path).get().then((snapshot) =>
-          snapshot.exists ? jsonFactoryFn(snapshot.data()!) : null);
+      _db.doc(path).get().then((snapshot) => snapshot.exists
+          ? jsonFactoryFn(snapshot.data()!)
+          : throw Exception(
+              'Requested load of non-existent document at path $path'));
 
   T _deserializeDocument<T>(
       final DocumentSnapshot<Map<String, dynamic>> snapshot,

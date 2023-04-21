@@ -51,12 +51,15 @@ class WelcomePage extends StatelessWidget {
               Expanded(
                 child: Text('We\'re glad to see you again, ${player.name}.'),
               ),
-              textNotificationForInProgressSession(player),
+              FutureBuilder<Widget>(
+                future: _textNotificationForInProgressSession(player),
+                builder: (context, snapshot) => snapshot.data!,
+              ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => _racesPage(player)),
                 ),
-                child: Text('LET\'S PLAY!'),
+                child: const Text('LET\'S PLAY!'),
               )
             ],
           ),
@@ -107,11 +110,18 @@ class WelcomePage extends StatelessWidget {
           ),
         ),
       );
-      
-        textNotificationForInProgressSession(final Player player) {
-          if (player.sessionId != null) {
-            final session = raceService.getSessions
-            return Text('It appears that you\'re already running in a race')
-          }
-        }
+
+  Future<Widget> _textNotificationForInProgressSession(
+      final Player player) async {
+    if (player.raceId != null && player.sessionId != null) {
+      final race = await raceService.getRaceById(player.raceId!);
+      final session =
+          await raceService.getSessionById(player.raceId!, player.sessionId!);
+
+      return Text(
+          'It appears that you\'re already running in a race:\n\t${race.name}\n\t${session.name}');
+    } else {
+      return Container();
+    }
+  }
 }
