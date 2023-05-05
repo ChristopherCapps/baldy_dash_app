@@ -1,21 +1,22 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+
+import 'identity.dart';
 
 part 'crew.g.dart';
 
 @JsonSerializable()
 @immutable
-class Crew extends Equatable {
-  final String id;
+class Crew extends Identity {
   final String name;
+  final String courseId;
   final String waypointId;
   final List<String> players;
   final DateTime? completedTime;
 
-  const Crew(
-      {required this.id,
-      required this.name,
+  const Crew(super.id, super.path,
+      {required this.name,
+      required this.courseId,
       required this.waypointId,
       required this.players,
       this.completedTime});
@@ -25,7 +26,8 @@ class Crew extends Equatable {
   Map<String, Object?> toJson() => _$CrewToJson(this);
 
   @override
-  List<Object?> get props => [name, waypointId, players, completedTime];
+  List<Object?> get props =>
+      [name, courseId, waypointId, players, completedTime];
 
   @override
   bool get stringify => true;

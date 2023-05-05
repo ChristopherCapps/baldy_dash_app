@@ -1,18 +1,19 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+
+import 'identity.dart';
 
 part 'message.g.dart';
 
 @JsonSerializable()
 @immutable
-class Message extends Equatable {
+class Message extends Identity {
   final String authorId;
   final DateTime timestamp;
   final String text;
   final String? photoUrl;
 
-  const Message(
+  const Message(super.id, super.path,
       {required this.authorId,
       required this.timestamp,
       required this.text,

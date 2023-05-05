@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../widget/loading_widget.dart';
 import './races_page.dart';
 import '../../engine.dart';
 import '../../model/player.dart';
+import '../../model/race.dart';
+import '../../model/session.dart';
 import '../../service/race_service.dart';
 import '../widget/error_message_widget.dart';
 import '../widget/name_prompt_widget.dart';
+import '../widget/race_tile_widget.dart';
+import 'ready_page.dart';
 
 class WelcomePage extends StatelessWidget {
   final RaceService raceService;
@@ -23,11 +28,16 @@ class WelcomePage extends StatelessWidget {
                     'We weren\'t able to initialize the app. ${snapshot.error}',
               );
             }
-            final player = snapshot.data;
-            if (player != null) {
-              return _welcomeBack(context, player);
+            if (snapshot.connectionState == ConnectionState.active ||
+                snapshot.connectionState == ConnectionState.done) {
+              final player = snapshot.data!;
+              if (player.name != Player.newPlayerName) {
+                return _welcomeBack(context, player);
+              }
+              return _welcomeNewcomer(context);
+            } else {
+              return const LoadingWidget();
             }
-            return _welcomeNewcomer(context);
           },
         ),
       );
@@ -48,12 +58,10 @@ class WelcomePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text('We\'re glad to see you again, ${player.name}.'),
-              ),
-              FutureBuilder<Widget>(
-                future: _textNotificationForInProgressSession(player),
-                builder: (context, snapshot) => snapshot.data!,
+              Text('We\'re glad to see you again, ${player.name}.'),
+              WelcomeBackWidget(
+                raceService,
+                player,
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).push(
@@ -101,7 +109,7 @@ class WelcomePage extends StatelessWidget {
               NamePromptWidget(
                 onSubmitted: (name) async {
                   final player = await _createNewPlayer(name);
-                  Navigator.of(context).push(
+                  await Navigator.of(context).push(
                     MaterialPageRoute(builder: (context) => _racesPage(player)),
                   );
                 },
@@ -110,18 +118,94 @@ class WelcomePage extends StatelessWidget {
           ),
         ),
       );
+}
 
-  Future<Widget> _textNotificationForInProgressSession(
-      final Player player) async {
-    if (player.raceId != null && player.sessionId != null) {
-      final race = await raceService.getRaceById(player.raceId!);
-      final session =
-          await raceService.getSessionById(player.raceId!, player.sessionId!);
+class WelcomeBackWidget extends StatefulWidget {
+  final RaceService raceService;
+  final Player player;
 
-      return Text(
-          'It appears that you\'re already running in a race:\n\t${race.name}\n\t${session.name}');
-    } else {
-      return Container();
+  const WelcomeBackWidget(this.raceService, this.player, {super.key});
+
+  @override
+  State<StatefulWidget> createState() => _WelcomeBackWidget();
+}
+
+class _WelcomeBackWidget extends State<WelcomeBackWidget> {
+  Session? _priorSession;
+
+  _WelcomeBackWidget();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.player.sessionId != null) {
+      final session = widget.raceService.getSessionStreamById(
+        widget.player.raceId!,
+        widget.player.sessionId!,
+      );
+      session.listen(
+        (session) {
+          setState(() {
+            _priorSession = session;
+          });
+        },
+        cancelOnError: true,
+      );
     }
   }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_priorSession != null) {
+      return Container(
+        padding: const EdgeInsets.only(top: 20.0, bottom: 20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+                '''Looks like you were last participating in this race, which ${_getPriorSessionStatusText(_priorSession!.state)}'''),
+            FutureBuilder<Race>(
+              future: widget.raceService.getRaceById(widget.player.raceId!),
+              builder: (context, snapshot) => snapshot.hasData
+                  ? Column(
+                      children: [
+                        RaceTileWidget(snapshot.data!),
+                        _resumeSessionButton(snapshot.data!, _priorSession!),
+                      ],
+                    )
+                  : snapshot.hasError
+                      ? ErrorMessageWidget.withDefaults(
+                          details: snapshot.error.toString(),
+                        )
+                      : const LoadingWidget(),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return const Text('Looks like you\'re about to run your first race!');
+    }
+  }
+
+  String? _getPriorSessionStatusText(final SessionState state) => {
+        SessionState.pending: 'will be starting soon.',
+        SessionState.paused: 'has been paused by the gamemaster.',
+        SessionState.completed: 'has completed already.',
+        SessionState.running: 'is still underway!'
+      }[state];
+
+  Widget _resumeSessionButton(final Race race, final Session priorSession) =>
+      ElevatedButton(
+        onPressed: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+                builder: (context) => _readyPage(race, priorSession)),
+          );
+        },
+        child: const Text('REJOIN NOW'),
+      );
+
+  Widget _readyPage(Race race, Session priorSession) =>
+      ReadyPage(race, priorSession);
 }

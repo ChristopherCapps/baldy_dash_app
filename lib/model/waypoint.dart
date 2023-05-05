@@ -1,24 +1,20 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+
+import 'identity.dart';
 
 part 'waypoint.g.dart';
 
 @JsonSerializable()
 @immutable
-class Waypoint extends Equatable {
-  final int id;
+class Waypoint extends Identity {
   final String clue;
   final List<String> answers;
   final String? region;
   final String? imageUrl;
 
-  const Waypoint(
-      {required this.id,
-      required this.clue,
-      required this.answers,
-      this.region,
-      this.imageUrl});
+  const Waypoint(super.id, super.path,
+      {required this.clue, required this.answers, this.region, this.imageUrl});
 
   factory Waypoint.fromJson(Map<String, dynamic> json) =>
       _$WaypointFromJson(json);

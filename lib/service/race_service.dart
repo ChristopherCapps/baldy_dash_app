@@ -2,7 +2,7 @@ import '../model/crew.dart';
 import '../model/player.dart';
 import '../model/race.dart';
 import '../model/session.dart';
-import '../model/waypoint.dart';
+//import '../model/waypoint.dart';
 
 abstract class RaceService {
   Stream<List<Race>> getRaces();
@@ -13,15 +13,17 @@ abstract class RaceService {
 
   Future<Session> getSessionById(String raceId, String sessionId);
 
+  Stream<Session> getSessionStreamById(String raceId, String sessionId);
+
   Stream<List<Crew>> getCrews(Race race, Session session);
 
   Stream<Crew> getCrew(Race race, Session session, Crew crew);
 
-  Future<Player?> getPlayer();
+  Future<Player> getPlayer();
 
-  Future<Player?> getOtherPlayer(String id);
+  Future<Player> getOtherPlayer(String id);
 
-  Stream<List<Waypoint>> getWaypoints(Race race);
+  //Stream<List<Waypoint>> getWaypoints(Race race);
 
   Future<Player> createPlayer(Role role, String name);
 

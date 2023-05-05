@@ -6,6 +6,7 @@ import '../../service/race_service.dart';
 import '../page/sessions_page.dart';
 import '../widget/error_message_widget.dart';
 import '../widget/loading_widget.dart';
+import '../widget/race_tile_widget.dart';
 
 class RacesPage extends StatelessWidget {
   final RaceService raceService;
@@ -54,44 +55,20 @@ class RacesPage extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   itemCount: races.length,
-                  itemBuilder: (context, index) =>
-                      raceListTile(context, races[index]),
+                  itemBuilder: (context, index) => RaceTileWidget(
+                    races[index],
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => SessionsPage(
+                            raceService: raceService, race: races[index]),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
           );
         },
-      );
-
-  ListTile raceListTile(BuildContext context, Race race) {
-    print('Render race: $race');
-    return ListTile(
-      enabled: race.available,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) =>
-              SessionsPage(raceService: raceService, race: race),
-        ),
-      ),
-      title: Text(race.name),
-      subtitle: Text(race.tagLineOrDefault),
-      leading: raceLogo(race),
-      trailing: race.available
-          ? const Icon(
-              Icons.verified,
-              color: Colors.green,
-            )
-          : null,
-    );
-  }
-
-  static const defaultRaceUrl =
-      'https://quest-baldy-dash.web.app/images/Old-Baldy-p-500.jpg';
-
-  CircleAvatar raceLogo(final Race race) => CircleAvatar(
-        backgroundImage: NetworkImage(race.logoUrl ?? defaultRaceUrl),
-        //foregroundImage: NetworkImage(race.logoUrl ?? defaultRaceUrl),
-        //child: const Text('BD'),
       );
 
   Container banner() => Container(

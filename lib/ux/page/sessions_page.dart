@@ -86,9 +86,25 @@ class SessionsPage extends StatelessWidget {
       ),
       title: Text(session.name),
       subtitle: Text(session.tagLineOrDefault),
-      trailing: const Text('PENDING'),
+      trailing: _sessionStatusWidget(session),
     );
   }
+
+  Column _sessionStatusWidget(final Session session) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            {
+              SessionState.paused: 'PAUSED',
+              SessionState.completed: 'COMPLETED',
+              SessionState.pending: 'PENDING',
+              SessionState.running: 'IN PROGRESS'
+            }[session.state]!,
+          ),
+          Text('Started 23 minutes ago')
+        ],
+      );
 
   Container banner() => Container(
         padding: const EdgeInsets.only(bottom: 18.0),

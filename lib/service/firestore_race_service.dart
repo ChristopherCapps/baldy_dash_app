@@ -4,7 +4,6 @@ import '../model/crew.dart';
 import '../model/player.dart';
 import '../model/race.dart';
 import '../model/session.dart';
-import '../model/waypoint.dart';
 import 'race_service.dart';
 
 typedef JsonFactoryFunction<T> = T Function(Map<String, dynamic> json);
@@ -13,6 +12,7 @@ typedef JsonSerializationFunction<T> = Map<String, dynamic> Function(T entity);
 const _playersPathElement = 'players';
 const _racesPathElement = 'races';
 const _sessionsPathElement = 'sessions';
+const _coursesPathElement = 'courses';
 const _crewsPathElement = 'crews';
 const _waypointsPathElement = 'waypoints';
 
@@ -42,12 +42,18 @@ class FirestoreRaceService implements RaceService {
   String _crewsPath(final String raceId, final String sessionId) =>
       '$_racesPathElement/$raceId/$_sessionsPathElement/$sessionId/$_crewsPathElement';
 
-  String _waypointsPath(final String raceId) =>
-      '$_racesPathElement/$raceId/$_waypointsPathElement';
+  String _coursesPath(final String raceId) =>
+      '$_racesPathElement/$raceId/$_coursesPathElement';
+
+  String _waypointsPath(final String raceId, final String courseId) =>
+      '${_coursePath(raceId, courseId)}/$_waypointsPathElement';
 
   String _playerPath(final String playerId) => '${_playersPath()}/$playerId';
 
   String _racePath(final String raceId) => '${_racesPath()}/$raceId';
+
+  String _coursePath(final String raceId, final String courseId) =>
+      '${_coursesPath(raceId)}/$courseId';
 
   String _sessionPath(final String raceId, final String sessionId) =>
       '${_sessionsPath(raceId)}/$sessionId';
@@ -56,8 +62,9 @@ class FirestoreRaceService implements RaceService {
           final String raceId, final String sessionId, final String crewId) =>
       '${_crewsPath(raceId, sessionId)}/$crewId';
 
-  String _waypointPath(final String raceId, final String waypointId) =>
-      '${_waypointsPath(raceId)}/$waypointId';
+  String _waypointPath(final String raceId, final String courseId,
+          final String waypointId) =>
+      '${_waypointsPath(raceId, courseId)}/$waypointId';
 
   @override
   Stream<List<Race>> getRaces() => _getCollection(_racesPath(), Race.fromJson);
@@ -68,9 +75,13 @@ class FirestoreRaceService implements RaceService {
         Race.fromJson,
       );
 
-  @override
-  Stream<List<Waypoint>> getWaypoints(final Race race) =>
-      _getCollection(_waypointsPath(race.id), Waypoint.fromJson);
+  // Future<Race> getRaceBySessionId(final String sessionId) async {
+
+  // }
+
+  // @override
+  // Stream<List<Waypoint>> getWaypoints(final Course course) =>
+  //     _getCollection(_waypointsPath(race.id), Waypoint.fromJson);
 
   @override
   Future<Session> getSessionById(String raceId, String sessionId) async =>
@@ -78,6 +89,16 @@ class FirestoreRaceService implements RaceService {
         _sessionPath(raceId, sessionId),
         Session.fromJson,
       );
+
+  @override
+  Stream<Session> getSessionStreamById(String raceId, String sessionId) async* {
+    await for (final session in _getDocumentStream(
+      _sessionPath(raceId, sessionId),
+      Session.fromJson,
+    )) {
+      yield session;
+    }
+  }
 
   @override
   Stream<List<Session>> getSessions(final Race race) =>
@@ -88,10 +109,12 @@ class FirestoreRaceService implements RaceService {
       _getCollection(_crewsPath(race.id, session.id), Crew.fromJson);
 
   @override
-  Future<Player?> getPlayer() => getOtherPlayer(_uuid);
+  Future<Player> getPlayer() => getOtherPlayer(_uuid).onError(
+      (error, stackTrace) => Player(_uuid, _playerPath(_uuid),
+          role: Role.participant, name: Player.newPlayerName));
 
   @override
-  Future<Player?> getOtherPlayer(final String id) =>
+  Future<Player> getOtherPlayer(final String id) =>
       _getDocument(_playerPath(id), Player.fromJson);
 
   @override
@@ -111,7 +134,8 @@ class FirestoreRaceService implements RaceService {
       await _create(
         _playerPath(_uuid),
         Player(
-          id: _uuid,
+          _uuid,
+          _playerPath(_uuid),
           role: role,
           name: name,
         ),
@@ -147,18 +171,30 @@ class FirestoreRaceService implements RaceService {
     );
   }
 
+  Stream<T> _getDocumentStream<T>(
+      final String path, JsonFactoryFunction<T> jsonFactoryFn) async* {
+    print('Fetching document stream at $path');
+    final snapshots = _db.doc(path).snapshots();
+    await for (final snapshot in snapshots) {
+      yield _deserializeDocument<T>(snapshot, jsonFactoryFn);
+    }
+  }
+
   Future<T> _getDocument<T>(
-          final String path, JsonFactoryFunction<T> jsonFactoryFn) async =>
-      _db.doc(path).get().then((snapshot) => snapshot.exists
-          ? jsonFactoryFn(snapshot.data()!)
-          : throw Exception(
-              'Requested load of non-existent document at path $path'));
+      final String path, JsonFactoryFunction<T> jsonFactoryFn) async {
+    print('Fetching document at $path');
+    return _db.doc(path).get().then((snapshot) => snapshot.exists
+        ? _deserializeDocument<T>(snapshot, jsonFactoryFn)
+        : throw Exception(
+            'Requested load of non-existent document at path $path'));
+  }
 
   T _deserializeDocument<T>(
       final DocumentSnapshot<Map<String, dynamic>> snapshot,
       final JsonFactoryFunction<T> jsonFactoryFn) {
     final data = snapshot.data()!;
     data['id'] = snapshot.id;
+    data['path'] = snapshot.reference.path;
     for (final key in data.keys) {
       final value = data[key];
       if (value is Timestamp) {

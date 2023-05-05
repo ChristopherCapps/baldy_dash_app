@@ -7,6 +7,7 @@ import '../../model/session.dart';
 import '../../service/race_service.dart';
 import '../widget/error_message_widget.dart';
 import '../widget/loading_widget.dart';
+import 'ready_page.dart';
 
 class CrewsPage extends StatelessWidget {
   final Race race;
@@ -86,12 +87,13 @@ class CrewsPage extends StatelessWidget {
           return FutureBuilder<List<Player>>(
             future: raceService.getPlayers(crew.data!),
             builder: (_, players) => ListTile(
-              // enabled: session.available,
-              // onTap: () => Navigator.of(context).push(
-              //   MaterialPageRoute(
-              //     builder: (context) => SessionsPage(race: race),
-              //   ),
-              // ),
+              enabled: session.state == SessionState.pending ||
+                  session.state == SessionState.running,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ReadyPage(race, session),
+                ),
+              ),
               title: Text(crew.data?.name ?? 'Loading...'),
               subtitle: Text(
                   players.hasData ? getListOfPlayerNames(players.data!) : ''),

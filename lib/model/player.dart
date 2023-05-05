@@ -1,6 +1,7 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+
+import 'identity.dart';
 
 part 'player.g.dart';
 
@@ -8,16 +9,18 @@ enum Role { gamemaster, participant }
 
 @JsonSerializable()
 @immutable
-abstract class Player extends Equatable {
-  final String id;
+abstract class Player extends Identity {
+  static const newPlayerName = 'New Dasher';
+
   final Role role;
   final String? raceId;
   final String? sessionId;
   final String? crewId;
   final String name;
 
-  const Player._({
-    required this.id,
+  const Player._(
+    super.id,
+    super.path, {
     required this.role,
     required this.name,
     this.raceId,
@@ -25,13 +28,14 @@ abstract class Player extends Equatable {
     this.crewId,
   });
 
-  const factory Player({
-    required String id,
+  const factory Player(
+    final String id,
+    final String path, {
     required Role role,
     required String name,
-    String? raceId,
-    String? sessionId,
-    String? crewId,
+    final String? raceId,
+    final String? sessionId,
+    final String? crewId,
   }) = _Player;
 
   factory Player.fromJson(Map<String, dynamic> json) => _$PlayerFromJson(json);
@@ -56,8 +60,9 @@ abstract class Player extends Equatable {
 }
 
 class _Player extends Player {
-  const _Player({
-    required super.id,
+  const _Player(
+    super.id,
+    super.path, {
     required super.role,
     required super.name,
     super.raceId,
@@ -68,6 +73,7 @@ class _Player extends Player {
   @override
   Player copyWith({
     String? id,
+    String? path,
     Role? role,
     String? name,
     dynamic raceId = _Unset,
@@ -75,7 +81,8 @@ class _Player extends Player {
     dynamic crewId = _Unset,
   }) =>
       _Player(
-        id: id ?? this.id,
+        id ?? this.id,
+        path ?? this.path,
         role: role ?? this.role,
         name: name ?? this.name,
         raceId: raceId == _Unset ? this.raceId : raceId as String?,

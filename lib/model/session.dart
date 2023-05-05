@@ -1,23 +1,24 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+
+import 'identity.dart';
 
 part 'session.g.dart';
 
 @JsonSerializable()
 @immutable
-class Session extends Equatable {
+class Session extends Identity {
   final SessionState state;
-  final String id;
   final String name;
+  final String raceId;
   final String? tagLine;
   final String? passkey;
   final DateTime? startTime;
   final DateTime? completedTime;
 
-  const Session(
-      {required this.id,
-      required this.name,
+  const Session(super.id, super.path,
+      {required this.name,
+      required this.raceId,
       required this.state,
       this.tagLine,
       this.passkey,
