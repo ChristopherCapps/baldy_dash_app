@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../widget/loading_widget.dart';
 import './races_page.dart';
 import '../../engine.dart';
 import '../../model/player.dart';
@@ -8,6 +7,7 @@ import '../../model/race.dart';
 import '../../model/session.dart';
 import '../../service/race_service.dart';
 import '../widget/error_message_widget.dart';
+import '../widget/loading_widget.dart';
 import '../widget/name_prompt_widget.dart';
 import '../widget/race_tile_widget.dart';
 import 'ready_page.dart';
@@ -28,8 +28,9 @@ class WelcomePage extends StatelessWidget {
                     'We weren\'t able to initialize the app. ${snapshot.error}',
               );
             }
-            if (snapshot.connectionState == ConnectionState.active ||
-                snapshot.connectionState == ConnectionState.done) {
+            if ((snapshot.connectionState == ConnectionState.active ||
+                    snapshot.connectionState == ConnectionState.done) &&
+                snapshot.hasData) {
               final player = snapshot.data!;
               if (player.name != Player.newPlayerName) {
                 return _welcomeBack(context, player);
@@ -206,6 +207,6 @@ class _WelcomeBackWidget extends State<WelcomeBackWidget> {
         child: const Text('REJOIN NOW'),
       );
 
-  Widget _readyPage(Race race, Session priorSession) =>
-      ReadyPage(race, priorSession);
+  Widget _readyPage(final Race race, final Session priorSession) =>
+      ReadyPage(widget.raceService, race, priorSession);
 }

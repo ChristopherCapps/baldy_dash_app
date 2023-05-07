@@ -1,9 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rxdart/rxdart.dart';
 
+import '../model/course.dart';
 import '../model/crew.dart';
+import '../model/gaming_snapshot.dart';
 import '../model/player.dart';
 import '../model/race.dart';
 import '../model/session.dart';
+import '../model/waypoint.dart';
 import 'race_service.dart';
 
 typedef JsonFactoryFunction<T> = T Function(Map<String, dynamic> json);
@@ -75,13 +79,31 @@ class FirestoreRaceService implements RaceService {
         Race.fromJson,
       );
 
+  @override
+  Stream<Race> getRaceStreamById(final String raceId) async* {
+    await for (final race in _getDocumentStream(
+      _racePath(raceId),
+      Race.fromJson,
+    )) {
+      yield race;
+    }
+  }
+
   // Future<Race> getRaceBySessionId(final String sessionId) async {
 
   // }
 
-  // @override
-  // Stream<List<Waypoint>> getWaypoints(final Course course) =>
-  //     _getCollection(_waypointsPath(race.id), Waypoint.fromJson);
+  @override
+  Stream<Map<String, Waypoint>> getWaypointsStreamById(
+          final String raceId, final String courseId) =>
+      _getCollection(_waypointsPath(raceId, courseId), Waypoint.fromJson)
+          .map<Map<String, Waypoint>>((waypoints) =>
+              {for (var waypoint in waypoints) waypoint.id: waypoint});
+
+  @override
+  Stream<Map<String, Waypoint>> getWaypoints(
+          final Race race, final Course course) =>
+      getWaypointsStreamById(race.id, course.id);
 
   @override
   Future<Session> getSessionById(String raceId, String sessionId) async =>
@@ -118,16 +140,22 @@ class FirestoreRaceService implements RaceService {
       _getDocument(_playerPath(id), Player.fromJson);
 
   @override
-  Stream<Crew> getCrew(
+  Stream<Crew> getCrewStream(
           final Race race, final Session session, final Crew crew) =>
+      getCrewStreamById(race.id, session.id, crew.id);
+
+  @override
+  Stream<Crew> getCrewStreamById(
+          String raceId, String sessionId, String crewId) =>
       _db
-          .doc(_crewPath(race.id, session.id, crew.id))
+          .doc(_crewPath(raceId, sessionId, crewId))
           .snapshots()
           .map((snapshot) => _deserializeDocument(snapshot, Crew.fromJson));
 
+  @override
   Stream<List<String>> getPlayersForCrew(
           final Race race, final Session session, final Crew crew) =>
-      getCrew(race, session, crew).map((snapshot) => snapshot.players);
+      getCrewStream(race, session, crew).map((snapshot) => snapshot.players);
 
   @override
   Future<Player> createPlayer(final Role role, final String name) async =>
@@ -216,14 +244,27 @@ class FirestoreRaceService implements RaceService {
             ),
           );
 
+  Stream<GamingSnapshot> getGamingStreamById(
+    String raceId,
+    String sessionId,
+    String crewId,
+    String courseId,
+  ) =>
+      CombineLatestStream.combine4(
+        getRaceStreamById(raceId),
+        getSessionStreamById(raceId, sessionId),
+        getCrewStreamById(raceId, sessionId, crewId),
+        getWaypointsStreamById(raceId, courseId),
+        (race, session, crew, waypoints) =>
+            GamingSnapshot(race, session, crew, waypoints),
+      );
+
   @override
   Future<List<Player>> getPlayers(final Crew crew) async {
     var players = <Player>[];
     for (final playerId in crew.players) {
       final player = await getOtherPlayer(playerId);
-      if (player != null) {
-        players = [...players, player];
-      }
+      players = [...players, player];
     }
     return players;
   }

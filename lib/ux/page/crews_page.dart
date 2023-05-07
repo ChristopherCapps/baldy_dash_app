@@ -80,18 +80,20 @@ class CrewsPage extends StatelessWidget {
   StreamBuilder crewListTile(BuildContext context, Crew crew) {
     debugPrint('Render crew: $crew');
     return StreamBuilder<Crew>(
-      stream: raceService.getCrew(race, session, crew),
-      builder: (_, crew) {
-        if (crew.connectionState == ConnectionState.done ||
-            crew.connectionState == ConnectionState.active) {
+      stream: raceService.getCrewStream(race, session, crew),
+      builder: (_, crewSnapshot) {
+        if (crewSnapshot.connectionState == ConnectionState.done ||
+            crewSnapshot.connectionState == ConnectionState.active) {
+          final crew = crewSnapshot.data!;
           return FutureBuilder<List<Player>>(
-            future: raceService.getPlayers(crew.data!),
+            future: raceService.getPlayers(crew),
             builder: (_, players) => ListTile(
               enabled: session.state == SessionState.pending ||
                   session.state == SessionState.running,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => ReadyPage(race, session),
+                  builder: (context) =>
+                      ReadyPage(raceService, race, session, crew),
                 ),
               ),
               title: Text(crew.data?.name ?? 'Loading...'),
