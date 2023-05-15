@@ -11,7 +11,6 @@ import '../../service/service_registry.dart';
 import '../widget/error_message_widget.dart';
 import '../widget/loading_widget.dart';
 
-// test
 class RacingPage extends StatelessWidget {
   final Stream<RacingSnapshotWithWaypoints> _racingSnapshots;
 

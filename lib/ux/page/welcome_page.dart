@@ -14,6 +14,6 @@ class WelcomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _engine.playerNameIsUnset()
-      ? WelcomeBackWidget()
-      : WelcomeNewcomerWidget();
+      ? WelcomeNewcomerWidget()
+      : WelcomeBackWidget();
 }
