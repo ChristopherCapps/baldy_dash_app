@@ -13,9 +13,7 @@ abstract class Player extends Identity {
   static const newPlayerName = 'New Dasher';
 
   final Role role;
-  final String? raceId;
-  final String? sessionId;
-  final String? crewId;
+  final String? crewPath;
   final String name;
 
   const Player._(
@@ -23,9 +21,7 @@ abstract class Player extends Identity {
     super.path, {
     required this.role,
     required this.name,
-    this.raceId,
-    this.sessionId,
-    this.crewId,
+    this.crewPath,
   });
 
   const factory Player(
@@ -33,9 +29,7 @@ abstract class Player extends Identity {
     final String path, {
     required Role role,
     required String name,
-    final String? raceId,
-    final String? sessionId,
-    final String? crewId,
+    final String? crewPath,
   }) = _Player;
 
   factory Player.fromJson(Map<String, dynamic> json) => _$PlayerFromJson(json);
@@ -44,7 +38,7 @@ abstract class Player extends Identity {
       _$PlayerToJson(player);
 
   @override
-  List<Object?> get props => [role, raceId, sessionId, crewId, name];
+  List<Object?> get props => [role, name, crewPath];
 
   @override
   bool get stringify => true;
@@ -52,9 +46,7 @@ abstract class Player extends Identity {
   Player copyWith({
     String? id,
     Role? role,
-    String? raceId,
-    String? sessionId,
-    String? crewId,
+    String? crewPath,
     String name,
   });
 }
@@ -65,9 +57,7 @@ class _Player extends Player {
     super.path, {
     required super.role,
     required super.name,
-    super.raceId,
-    super.sessionId,
-    super.crewId,
+    super.crewPath,
   }) : super._();
 
   @override
@@ -76,18 +66,14 @@ class _Player extends Player {
     String? path,
     Role? role,
     String? name,
-    dynamic raceId = _Unset,
-    dynamic sessionId = _Unset,
-    dynamic crewId = _Unset,
+    dynamic crewPath = _Unset,
   }) =>
       _Player(
         id ?? this.id,
         path ?? this.path,
         role: role ?? this.role,
         name: name ?? this.name,
-        raceId: raceId == _Unset ? this.raceId : raceId as String?,
-        sessionId: sessionId == _Unset ? this.sessionId : sessionId as String?,
-        crewId: crewId == _Unset ? this.crewId : crewId as String?,
+        crewPath: crewPath == _Unset ? this.crewPath : crewPath as String?,
       );
 }
 

@@ -1,6 +1,6 @@
 import '../model/course.dart';
 import '../model/crew.dart';
-import '../model/gaming_snapshot.dart';
+
 import '../model/player.dart';
 import '../model/race.dart';
 import '../model/session.dart';
@@ -21,12 +21,18 @@ abstract class RaceService {
 
   Stream<List<Crew>> getCrews(Race race, Session session);
 
+  Future<Crew> getCrewById(String raceId, String sessionId, String crewId);
+
+  Future<Crew> getCrewByPath(String crewPath);
+
   Stream<Crew> getCrewStream(Race race, Session session, Crew crew);
 
   Stream<Crew> getCrewStreamById(
       String raceId, String sessionId, String crewId);
 
   Future<Player> getPlayer();
+
+  Stream<Player> getPlayerStream();
 
   Future<Player> getOtherPlayer(String id);
 
@@ -37,10 +43,37 @@ abstract class RaceService {
 
   Future<Player> createPlayer(Role role, String name);
 
-  Stream<GamingSnapshot> getGamingStreamById(
-      String raceId, String sessionId, String crewId, String courseId);
-
   void update(Player player);
 
   Future<List<Player>> getPlayers(Crew crew);
+
+  Stream<List<String>> getPlayersForCrew(
+      final Race race, final Session session, final Crew crew);
+
+  DecomposedCrewPath getDecomposedCrewPath(String crewPath);
+
+  Stream<RacingSnapshot> getRacingStreamByRaceAndSessionAndCrew(
+    String raceId,
+    String sessionId,
+    String crewId,
+  );
+
+  Stream<RacingSnapshotWithWaypoints>
+      getRacingStreamWithWaypointsByRaceAndSessionAndCrewAndCourse(
+    String raceId,
+    String sessionId,
+    String crewId,
+    String courseId,
+  );
 }
+
+typedef DecomposedCrewPath = ({String raceId, String sessionId, String crewId});
+
+typedef RacingSnapshot = ({Race race, Session session, Crew crew});
+
+typedef RacingSnapshotWithWaypoints = ({
+  Race race,
+  Session session,
+  Crew crew,
+  Map<String, Waypoint> waypoints,
+});

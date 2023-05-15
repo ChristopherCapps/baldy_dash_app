@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../service/service_registry.dart';
 import 'page/welcome_page.dart';
 
 class BaldyDashApp extends StatelessWidget {
@@ -19,7 +18,5 @@ class BaldyDashApp extends StatelessWidget {
     );
   }
 
-  WelcomePage _welcomePage() => WelcomePage(
-        ServiceRegistry.I.raceService,
-      );
+  WelcomePage _welcomePage() => WelcomePage();
 }

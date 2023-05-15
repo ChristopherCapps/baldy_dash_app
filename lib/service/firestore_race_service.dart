@@ -3,7 +3,6 @@ import 'package:rxdart/rxdart.dart';
 
 import '../model/course.dart';
 import '../model/crew.dart';
-import '../model/gaming_snapshot.dart';
 import '../model/player.dart';
 import '../model/race.dart';
 import '../model/session.dart';
@@ -136,6 +135,12 @@ class FirestoreRaceService implements RaceService {
           role: Role.participant, name: Player.newPlayerName));
 
   @override
+  Stream<Player> getPlayerStream() => _db
+      .doc(_playerPath(_uuid))
+      .snapshots()
+      .map((snapshot) => _deserializeDocument(snapshot, Player.fromJson));
+
+  @override
   Future<Player> getOtherPlayer(final String id) =>
       _getDocument(_playerPath(id), Player.fromJson);
 
@@ -143,6 +148,17 @@ class FirestoreRaceService implements RaceService {
   Stream<Crew> getCrewStream(
           final Race race, final Session session, final Crew crew) =>
       getCrewStreamById(race.id, session.id, crew.id);
+
+  @override
+  Future<Crew> getCrewById(String raceId, String sessionId, String crewId) =>
+      _getDocument(_crewPath(raceId, sessionId, crewId), Crew.fromJson);
+
+  @override
+  Future<Crew> getCrewByPath(String crewPath) {
+    final decomposedCrewPath = getDecomposedCrewPath(crewPath);
+    return getCrewById(decomposedCrewPath.raceId, decomposedCrewPath.sessionId,
+        decomposedCrewPath.crewId);
+  }
 
   @override
   Stream<Crew> getCrewStreamById(
@@ -158,21 +174,43 @@ class FirestoreRaceService implements RaceService {
       getCrewStream(race, session, crew).map((snapshot) => snapshot.players);
 
   @override
-  Future<Player> createPlayer(final Role role, final String name) async =>
-      await _create(
+  Future<Player> createPlayer(final Role role, final String name) async {
+    final normalizedRole = name.toUpperCase() == 'GM' ? Role.gamemaster : role;
+    final normalizedName =
+        role == Role.gamemaster ? 'Master Chris' : name.trim();
+    return await _create(
+      _playerPath(_uuid),
+      Player(
+        _uuid,
         _playerPath(_uuid),
-        Player(
-          _uuid,
-          _playerPath(_uuid),
-          role: role,
-          name: name,
-        ),
-        Player.toJson,
-      );
+        role: normalizedRole,
+        name: normalizedName,
+      ),
+      Player.toJson,
+    );
+  }
 
   @override
   void update(final Player player) async {
     _update(_playerPath(player.id), player, Player.toJson);
+  }
+
+  @override
+  DecomposedCrewPath getDecomposedCrewPath(String crewPath) {
+    final pattern =
+        RegExp(r'\/races\/<(\w+)>\/sessions\/<(\w+)>\/crews\/<(\w+)>');
+
+    if (!pattern.hasMatch(crewPath)) {
+      throw Exception('Invalid input format');
+    }
+
+    final match = pattern.firstMatch(crewPath)!;
+
+    return (
+      raceId: match.group(1)!,
+      sessionId: match.group(2)!,
+      crewId: match.group(3)!,
+    );
   }
 
   Future<T> _create<T>(final String path, T entity,
@@ -244,20 +282,35 @@ class FirestoreRaceService implements RaceService {
             ),
           );
 
-  Stream<GamingSnapshot> getGamingStreamById(
-    String raceId,
-    String sessionId,
-    String crewId,
-    String courseId,
+  @override
+  Stream<RacingSnapshot> getRacingStreamByRaceAndSessionAndCrew(
+          final String raceId, final String sessionId, final String crewId) =>
+      CombineLatestStream.combine3(
+          getRaceStreamById(raceId),
+          getSessionStreamById(raceId, sessionId),
+          getCrewStreamById(raceId, sessionId, crewId),
+          (race, session, crew) => (race: race, session: session, crew: crew));
+
+  @override
+  Stream<RacingSnapshotWithWaypoints>
+      getRacingStreamWithWaypointsByRaceAndSessionAndCrewAndCourse(
+    final String raceId,
+    final String sessionId,
+    final String crewId,
+    final String courseId,
   ) =>
-      CombineLatestStream.combine4(
-        getRaceStreamById(raceId),
-        getSessionStreamById(raceId, sessionId),
-        getCrewStreamById(raceId, sessionId, crewId),
-        getWaypointsStreamById(raceId, courseId),
-        (race, session, crew, waypoints) =>
-            GamingSnapshot(race, session, crew, waypoints),
-      );
+          CombineLatestStream.combine4(
+            getRaceStreamById(raceId),
+            getSessionStreamById(raceId, sessionId),
+            getCrewStreamById(raceId, sessionId, crewId),
+            getWaypointsStreamById(raceId, courseId),
+            (race, session, crew, waypoints) => (
+              race: race,
+              session: session,
+              crew: crew,
+              waypoints: waypoints
+            ),
+          );
 
   @override
   Future<List<Player>> getPlayers(final Crew crew) async {

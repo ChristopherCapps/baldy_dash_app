@@ -51,8 +51,7 @@ class CrewsPage extends StatelessWidget {
         stream: raceService.getCrews(race, session),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return ErrorMessageWidget.withDefaults(
-                details: snapshot.error!.toString());
+            return ErrorMessageWidget.withDefaults(snapshot.error!.toString());
           }
           if (!snapshot.hasData) {
             return const LoadingWidget();
@@ -93,10 +92,10 @@ class CrewsPage extends StatelessWidget {
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) =>
-                      ReadyPage(raceService, race, session, crew),
+                      ReadyPage((race: race, session: session, crew: crew)),
                 ),
               ),
-              title: Text(crew.data?.name ?? 'Loading...'),
+              title: Text(crew.name),
               subtitle: Text(
                   players.hasData ? getListOfPlayerNames(players.data!) : ''),
               //trailing: const Text('PENDING'),
@@ -111,8 +110,8 @@ class CrewsPage extends StatelessWidget {
 
   Container banner() => Container(
         padding: const EdgeInsets.only(bottom: 18.0),
-        child: Column(
-          children: const [
+        child: const Column(
+          children: [
             // Text(
             //   'Welcome!',
             //   style: TextStyle(

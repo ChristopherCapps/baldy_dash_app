@@ -15,6 +15,7 @@ class Session extends Identity {
   final String? passkey;
   final DateTime? startTime;
   final DateTime? completedTime;
+  final String? winningCrewPath;
 
   const Session(super.id, super.path,
       {required this.name,
@@ -23,7 +24,8 @@ class Session extends Identity {
       this.tagLine,
       this.passkey,
       this.startTime,
-      this.completedTime});
+      this.completedTime,
+      this.winningCrewPath});
 
   factory Session.fromJson(Map<String, dynamic> json) =>
       _$SessionFromJson(json);
@@ -34,7 +36,8 @@ class Session extends Identity {
       tagLine ?? 'The most fun you\'ll ever have in a golf cart!';
 
   @override
-  List<Object?> get props => [name, state, passkey, startTime, completedTime];
+  List<Object?> get props =>
+      [name, state, passkey, startTime, completedTime, winningCrewPath];
 
   @override
   bool get stringify => true;

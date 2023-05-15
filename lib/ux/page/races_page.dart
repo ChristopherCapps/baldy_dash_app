@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../engine.dart';
 import '../../model/race.dart';
 import '../../service/race_service.dart';
+import '../../service/service_registry.dart';
 import '../page/sessions_page.dart';
 import '../widget/error_message_widget.dart';
 import '../widget/loading_widget.dart';
@@ -12,10 +13,13 @@ class RacesPage extends StatelessWidget {
   final RaceService raceService;
   final Engine engine;
 
-  const RacesPage({
+  RacesPage({Key? key})
+      : this.custom(ServiceRegistry.I.raceService, Engine.I, key: key);
+
+  const RacesPage.custom(
+    this.raceService,
+    this.engine, {
     super.key,
-    required this.raceService,
-    required this.engine,
   });
 
   @override
@@ -39,8 +43,7 @@ class RacesPage extends StatelessWidget {
         stream: raceService.getRaces(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return ErrorMessageWidget.withDefaults(
-                details: snapshot.error!.toString());
+            return ErrorMessageWidget.withDefaults(snapshot.error!.toString());
           }
           if (!snapshot.hasData) {
             return const LoadingWidget();
@@ -73,8 +76,8 @@ class RacesPage extends StatelessWidget {
 
   Container banner() => Container(
         padding: const EdgeInsets.only(bottom: 18.0),
-        child: Column(
-          children: const [
+        child: const Column(
+          children: [
             // Text(
             //   'Welcome!',
             //   style: TextStyle(

@@ -45,8 +45,7 @@ class SessionsPage extends StatelessWidget {
         stream: raceService.getSessions(race),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return ErrorMessageWidget.withDefaults(
-                details: snapshot.error!.toString());
+            return ErrorMessageWidget.withDefaults(snapshot.error!.toString());
           }
           if (!snapshot.hasData) {
             return const LoadingWidget();
