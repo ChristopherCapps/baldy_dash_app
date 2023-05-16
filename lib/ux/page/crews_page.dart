@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../../engine.dart';
+
 import '../../model/crew.dart';
 import '../../model/player.dart';
 import '../../model/race.dart';
 import '../../model/session.dart';
 import '../../service/race_service.dart';
-import '../widget/error_message_widget.dart';
-import '../widget/loading_widget.dart';
+import '../widget/async_builder_template.dart';
 import 'ready_page.dart';
 
 class CrewsPage extends StatelessWidget {
   final Race race;
   final Session session;
+  final Engine engine;
   final RaceService raceService;
 
   const CrewsPage(
       {super.key,
+      required this.engine,
       required this.raceService,
       required this.race,
       required this.session});
@@ -47,17 +50,11 @@ class CrewsPage extends StatelessWidget {
         ),
       );
 
-  StreamBuilder<List<Crew>> crewsWidget() => StreamBuilder<List<Crew>>(
+  AsyncBuilderTemplate<List<Crew>> crewsWidget() =>
+      AsyncBuilderTemplate<List<Crew>>(
         stream: raceService.getCrews(race, session),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return ErrorMessageWidget.withDefaults(snapshot.error!.toString());
-          }
-          if (!snapshot.hasData) {
-            return const LoadingWidget();
-          }
-          final crews = snapshot.data!;
-          if (crews.isEmpty) {
+        builder: (context, crews) {
+          if (crews!.isEmpty) {
             return const Text('No crews are available for this race.');
           }
           // return Text("Test");
@@ -76,35 +73,29 @@ class CrewsPage extends StatelessWidget {
         },
       );
 
-  StreamBuilder crewListTile(BuildContext context, Crew crew) {
+  AsyncBuilderTemplate<Crew> crewListTile(BuildContext context, Crew crew) {
     debugPrint('Render crew: $crew');
-    return StreamBuilder<Crew>(
+    return AsyncBuilderTemplate<Crew>(
       stream: raceService.getCrewStream(race, session, crew),
-      builder: (_, crewSnapshot) {
-        if (crewSnapshot.connectionState == ConnectionState.done ||
-            crewSnapshot.connectionState == ConnectionState.active) {
-          final crew = crewSnapshot.data!;
-          return FutureBuilder<List<Player>>(
-            future: raceService.getPlayers(crew),
-            builder: (_, players) => ListTile(
-              enabled: session.state == SessionState.pending ||
-                  session.state == SessionState.running,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      ReadyPage((race: race, session: session, crew: crew)),
-                ),
+      builder: (context, crew) => AsyncBuilderTemplate<Set<Player>>(
+        future: raceService.getPlayers(crew!),
+        builder: (_, players) => ListTile(
+          enabled: session.state == SessionState.pending ||
+              session.state == SessionState.running,
+          onTap: () {
+            engine.assignPlayerToCrew(crew);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    ReadyPage((race: race, session: session, crew: crew)),
               ),
-              title: Text(crew.name),
-              subtitle: Text(
-                  players.hasData ? getListOfPlayerNames(players.data!) : ''),
-              //trailing: const Text('PENDING'),
-            ),
-          );
-        } else {
-          return const Text('Loading...');
-        }
-      },
+            );
+          },
+          title: Text(crew.name),
+          subtitle: Text(getListOfPlayerNames(players!)),
+          //trailing: const Text('PENDING'),
+        ),
+      ),
     );
   }
 
@@ -130,15 +121,16 @@ class CrewsPage extends StatelessWidget {
         ),
       );
 
-  String getListOfPlayerNames(final List<Player> players) {
+  String getListOfPlayerNames(final Set<Player> players) {
+    final playersList = [...players];
     if (players.isEmpty) {
       return 'Nobody has joined';
-    } else if (players.length == 1) {
-      return '${players[0].name} is the only member so far';
-    } else if (players.length == 2) {
-      return 'Just ${players[0].name} and ${players[1].name} so far';
+    } else if (playersList.length == 1) {
+      return '${playersList[0].name} is the only member so far';
+    } else if (playersList.length == 2) {
+      return 'Just ${playersList[0].name} and ${playersList[1].name} so far';
     } else {
-      return '${players.sublist(0, players.length - 1).map((player) => player.name).join(', ')} and ${players.reversed.first.name}';
+      return '${playersList.sublist(0, playersList.length - 1).map((playersList) => playersList.name).join(', ')} and ${playersList.reversed.first.name}';
     }
   }
 }

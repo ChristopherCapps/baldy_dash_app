@@ -5,8 +5,7 @@ import '../../model/race.dart';
 import '../../service/race_service.dart';
 import '../../service/service_registry.dart';
 import '../page/sessions_page.dart';
-import '../widget/error_message_widget.dart';
-import '../widget/loading_widget.dart';
+import '../widget/async_builder_template.dart';
 import '../widget/race_tile_widget.dart';
 
 class RacesPage extends StatelessWidget {
@@ -39,17 +38,11 @@ class RacesPage extends StatelessWidget {
         ),
       );
 
-  StreamBuilder<List<Race>> racesWidget() => StreamBuilder<List<Race>>(
+  AsyncBuilderTemplate<List<Race>> racesWidget() =>
+      AsyncBuilderTemplate<List<Race>>(
         stream: raceService.getRaces(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return ErrorMessageWidget.withDefaults(snapshot.error!.toString());
-          }
-          if (!snapshot.hasData) {
-            return const LoadingWidget();
-          }
-          final races = snapshot.data!;
-          if (races.isEmpty) {
+        builder: (context, races) {
+          if (races!.isEmpty) {
             return const Text('No races are available');
           }
           return Column(

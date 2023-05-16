@@ -11,7 +11,7 @@ class Crew extends Identity {
   final String name;
   final String courseId;
   final String waypointId;
-  final List<String> players;
+  final Set<String> players;
   final DateTime? completedTime;
 
   const Crew(super.id, super.path,
@@ -23,7 +23,7 @@ class Crew extends Identity {
 
   factory Crew.fromJson(Map<String, dynamic> json) => _$CrewFromJson(json);
 
-  Map<String, Object?> toJson() => _$CrewToJson(this);
+  static Map<String, Object?> toJson(final Crew crew) => _$CrewToJson(crew);
 
   @override
   List<Object?> get props =>

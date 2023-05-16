@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../engine.dart';
 import '../../model/race.dart';
 import '../../model/session.dart';
 import '../../service/race_service.dart';
-import '../widget/error_message_widget.dart';
-import '../widget/loading_widget.dart';
+import '../widget/async_builder_template.dart';
 import 'crews_page.dart';
 
 class SessionsPage extends StatelessWidget {
@@ -41,20 +41,13 @@ class SessionsPage extends StatelessWidget {
         ),
       );
 
-  StreamBuilder<List<Session>> sessionsWidget() => StreamBuilder<List<Session>>(
+  AsyncBuilderTemplate<List<Session>> sessionsWidget() =>
+      AsyncBuilderTemplate<List<Session>>(
         stream: raceService.getSessions(race),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return ErrorMessageWidget.withDefaults(snapshot.error!.toString());
-          }
-          if (!snapshot.hasData) {
-            return const LoadingWidget();
-          }
-          final sessions = snapshot.data!;
-          if (sessions.isEmpty) {
+        builder: (context, sessions) {
+          if (sessions!.isEmpty) {
             return const Text('No sessions are available for this race.');
           }
-          // return Text("Test");
           return Column(
             children: [
               banner(),
@@ -77,6 +70,7 @@ class SessionsPage extends StatelessWidget {
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => CrewsPage(
+            engine: Engine.I,
             raceService: raceService,
             race: race,
             session: session,
@@ -97,8 +91,8 @@ class SessionsPage extends StatelessWidget {
             {
               SessionState.paused: 'PAUSED',
               SessionState.completed: 'COMPLETED',
-              SessionState.pending: 'PENDING',
-              SessionState.running: 'IN PROGRESS'
+              SessionState.pending: 'STARTING SOON',
+              SessionState.running: 'HAPPENING NOW!'
             }[session.state]!,
           ),
           Text('Started 23 minutes ago')

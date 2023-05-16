@@ -169,7 +169,7 @@ class FirestoreRaceService implements RaceService {
           .map((snapshot) => _deserializeDocument(snapshot, Crew.fromJson));
 
   @override
-  Stream<List<String>> getPlayersForCrew(
+  Stream<Set<String>> getPlayersForCrew(
           final Race race, final Session session, final Crew crew) =>
       getCrewStream(race, session, crew).map((snapshot) => snapshot.players);
 
@@ -191,8 +191,13 @@ class FirestoreRaceService implements RaceService {
   }
 
   @override
-  void update(final Player player) async {
+  void updatePlayer(final Player player) async {
     _update(_playerPath(player.id), player, Player.toJson);
+  }
+
+  @override
+  void updateCrew(Crew crew) async {
+    _update(crew.path, crew, Crew.toJson);
   }
 
   @override
@@ -312,11 +317,11 @@ class FirestoreRaceService implements RaceService {
           );
 
   @override
-  Future<List<Player>> getPlayers(final Crew crew) async {
-    var players = <Player>[];
+  Future<Set<Player>> getPlayers(final Crew crew) async {
+    var players = <Player>{};
     for (final playerId in crew.players) {
       final player = await getOtherPlayer(playerId);
-      players = [...players, player];
+      players = {...players, player};
     }
     return players;
   }

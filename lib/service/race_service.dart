@@ -43,11 +43,13 @@ abstract class RaceService {
 
   Future<Player> createPlayer(Role role, String name);
 
-  void update(Player player);
+  void updatePlayer(Player player);
 
-  Future<List<Player>> getPlayers(Crew crew);
+  void updateCrew(Crew crew);
 
-  Stream<List<String>> getPlayersForCrew(
+  Future<Set<Player>> getPlayers(Crew crew);
+
+  Stream<Set<String>> getPlayersForCrew(
       final Race race, final Session session, final Crew crew);
 
   DecomposedCrewPath getDecomposedCrewPath(String crewPath);
