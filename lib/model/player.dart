@@ -38,7 +38,7 @@ abstract class Player extends Identity {
       _$PlayerToJson(player);
 
   @override
-  List<Object?> get props => [role, name, crewPath];
+  List<Object?> get props => [id, path, role, name, crewPath];
 
   @override
   bool get stringify => true;

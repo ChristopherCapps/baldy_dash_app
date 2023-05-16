@@ -6,12 +6,16 @@ import 'service/race_service.dart';
 class Engine {
   static Engine? _instance;
 
-  static Engine initialize(final RaceService raceService) {
+  static Future<Engine> initialize(final RaceService raceService) async {
     if (_instance != null) {
       return _instance!;
     }
 
-    _instance = Engine._(raceService);
+    final engine = Engine._(raceService);
+    _instance = engine;
+
+    // Make sure there's an initial value here before completing initialization
+    engine._onPlayerUpdated(await raceService.getPlayer());
 
     return _instance!;
   }

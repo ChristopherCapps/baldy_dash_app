@@ -22,7 +22,7 @@ class Waypoint extends Identity {
   Map<String, Object?> toJson() => _$WaypointToJson(this);
 
   @override
-  List<Object?> get props => [id, clue, answers, region, imageUrl];
+  List<Object?> get props => [id, path, clue, answers, region, imageUrl];
 
   @override
   bool get stringify => true;

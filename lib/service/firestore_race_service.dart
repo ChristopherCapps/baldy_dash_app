@@ -197,8 +197,7 @@ class FirestoreRaceService implements RaceService {
 
   @override
   DecomposedCrewPath getDecomposedCrewPath(String crewPath) {
-    final pattern =
-        RegExp(r'\/races\/<(\w+)>\/sessions\/<(\w+)>\/crews\/<(\w+)>');
+    final pattern = RegExp(r'races\/(\w+)\/sessions\/(\w+)\/crews\/(\w+)');
 
     if (!pattern.hasMatch(crewPath)) {
       throw Exception('Invalid input format');

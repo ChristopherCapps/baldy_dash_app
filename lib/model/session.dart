@@ -36,8 +36,16 @@ class Session extends Identity {
       tagLine ?? 'The most fun you\'ll ever have in a golf cart!';
 
   @override
-  List<Object?> get props =>
-      [name, state, passkey, startTime, completedTime, winningCrewPath];
+  List<Object?> get props => [
+        id,
+        path,
+        name,
+        state,
+        passkey,
+        startTime,
+        completedTime,
+        winningCrewPath
+      ];
 
   @override
   bool get stringify => true;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../model/session.dart';
@@ -20,20 +22,27 @@ class ReadyPage extends StatefulWidget {
 
 class _ReadyPageState extends State<ReadyPage> {
   late RacingSnapshot _racingSnapshot;
-  late final Stream<RacingSnapshot> _racingStream;
+  late final StreamSubscription<RacingSnapshot> _racingSubscription;
 
   @override
   void initState() {
     super.initState();
     _racingSnapshot = widget._racingSnapshot;
-    _racingStream = widget._raceService.getRacingStreamByRaceAndSessionAndCrew(
+    final racingStream =
+        widget._raceService.getRacingStreamByRaceAndSessionAndCrew(
       _racingSnapshot.race.id,
       _racingSnapshot.session.id,
       _racingSnapshot.crew.id,
     );
-    _racingStream.listen(
-      (racingSnapshot) => setState(() => _racingSnapshot = racingSnapshot),
-    );
+    _racingSubscription = racingStream.listen((racingSnapshot) {
+      if (mounted) (() => _racingSnapshot = racingSnapshot);
+    });
+  }
+
+  @override
+  void dispose() {
+    _racingSubscription.cancel();
+    super.dispose();
   }
 
   @override
