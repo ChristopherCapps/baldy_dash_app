@@ -53,12 +53,7 @@ class RacesPage extends StatelessWidget {
                   itemCount: races.length,
                   itemBuilder: (context, index) => RaceTileWidget(
                     races[index],
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => SessionsPage(
-                            raceService: raceService, race: races[index]),
-                      ),
-                    ),
+                    onTap: _navigateToSessionsPage(context, races[index]),
                   ),
                 ),
               ),
@@ -66,6 +61,12 @@ class RacesPage extends StatelessWidget {
           );
         },
       );
+
+  GestureTapCallback _navigateToSessionsPage(
+          final BuildContext context, final Race race) =>
+      () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => SessionsPage(race),
+          ));
 
   Container banner() => Container(
         padding: const EdgeInsets.only(bottom: 18.0),

@@ -4,6 +4,7 @@ import '../../engine.dart';
 import '../../model/race.dart';
 import '../../model/session.dart';
 import '../../service/race_service.dart';
+import '../../service/service_registry.dart';
 import '../widget/async_builder_template.dart';
 import 'crews_page.dart';
 
@@ -11,8 +12,10 @@ class SessionsPage extends StatelessWidget {
   final Race race;
   final RaceService raceService;
 
-  const SessionsPage(
-      {super.key, required this.raceService, required this.race});
+  SessionsPage(final Race race, {Key? key})
+      : this.custom(ServiceRegistry.I.raceService, race, key: key);
+
+  const SessionsPage.custom(this.raceService, this.race, {super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -66,7 +69,7 @@ class SessionsPage extends StatelessWidget {
   ListTile sessionListTile(BuildContext context, Session session) {
     print('Render session: $session');
     return ListTile(
-      //enabled: true,
+      enabled: session.state != SessionState.completed,
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => CrewsPage(

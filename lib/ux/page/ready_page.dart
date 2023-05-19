@@ -24,37 +24,45 @@ class ReadyPage extends StatelessWidget {
           _racingSnapshot.session.id,
           _racingSnapshot.crew.id,
         ),
-        builder: (context, racingSnapshot) {
-          if (racingSnapshot!.session.state == SessionState.running) {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => RacingPage(racingSnapshot)));
-            return Container();
-          } else {
-            return Scaffold(
-              appBar: AppBar(
-                title: Column(
-                  children: [
-                    const Text('Ready Room'),
-                    Text(
-                      '${racingSnapshot.race.name} / ${racingSnapshot.session.name}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+        builder: (context, racingSnapshot) => Scaffold(
+          appBar: AppBar(
+            title: Column(
+              children: [
+                const Text('Ready Room'),
+                Text(
+                  '${racingSnapshot!.race.name} / ${racingSnapshot.session.name}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                  ),
                 ),
-              ),
-              body: Container(
-                padding:
-                    const EdgeInsets.only(left: 20.0, right: 20.0, top: 35.0),
-                child: (_racingSnapshot.session.state == SessionState.completed)
-                    ? const Text('This race has ended.')
-                    : (_racingSnapshot.session.state == SessionState.running)
-                        ? const Text('This race is currently running.')
-                        : const Text('Race about to start'),
-              ),
-            );
-          }
-        },
+              ],
+            ),
+          ),
+          body: Container(
+            padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 35.0),
+            child: Column(
+              children: [
+                Text({
+                  SessionState.completed: 'This race has ended.',
+                  SessionState.running: 'This race is currently running.',
+                  SessionState.paused: 'This race is currently paused.',
+                  SessionState.pending: 'This race is about to start.',
+                }[racingSnapshot.session.state]!),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed:
+                      racingSnapshot.session.state == SessionState.running
+                          ? () => Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => RacingPage(racingSnapshot)))
+                          : null,
+                  child: const Text('LET\'S GO!'),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
 }

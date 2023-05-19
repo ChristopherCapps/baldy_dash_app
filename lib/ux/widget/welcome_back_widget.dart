@@ -65,9 +65,7 @@ class WelcomeBackWidget extends StatelessWidget {
       ),
       builder: (context, racingSnapshot) => Column(
         children: [
-          const Text('It looks like you were last running this race:'),
-          RaceTileWidget(racingSnapshot!.race),
-          switch (racingSnapshot.session.state) {
+          switch (racingSnapshot!.session.state) {
             SessionState.completed =>
               _buildCompletedPriorSessionWidget(racingSnapshot),
             SessionState.paused ||
