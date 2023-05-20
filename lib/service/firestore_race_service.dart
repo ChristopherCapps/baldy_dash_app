@@ -7,6 +7,7 @@ import '../model/player.dart';
 import '../model/race.dart';
 import '../model/session.dart';
 import '../model/waypoint.dart';
+import 'firestore_service.dart';
 import 'race_service.dart';
 
 typedef JsonFactoryFunction<T> = T Function(Map<String, dynamic> json);
@@ -169,6 +170,26 @@ class FirestoreRaceService implements RaceService {
           .map((snapshot) => _deserializeDocument(snapshot, Crew.fromJson));
 
   @override
+  void assignPlayerToCrew(final Crew crew) async {
+    await FirestoreService.I.runTransaction((transaction) async {
+      final player = await getPlayer();
+      if (player.crewPath != null) {
+        final currentCrew = await getCrewByPath(player.crewPath!);
+        if (crew.id == currentCrew.id) return;
+        // Remove player from current crew and then save
+        currentCrew.players.remove(player.id);
+        updateCrew(currentCrew, transaction: transaction);
+      }
+      // Add player to new crew and then save
+      crew.players.add(player.id);
+      updateCrew(crew, transaction: transaction);
+      // Update the player's crew path and then save
+      final updatedPlayer = player.copyWith(crewPath: crew.path);
+      updatePlayer(updatedPlayer, transaction: transaction);
+    });
+  }
+
+  @override
   Stream<Set<String>> getPlayersForCrew(
           final Race race, final Session session, final Crew crew) =>
       getCrewStream(race, session, crew).map((snapshot) => snapshot.players);
@@ -191,13 +212,14 @@ class FirestoreRaceService implements RaceService {
   }
 
   @override
-  void updatePlayer(final Player player) async {
-    _update(_playerPath(player.id), player, Player.toJson);
+  void updatePlayer(final Player player, {Transaction? transaction}) async {
+    _update(_playerPath(player.id), player, Player.toJson,
+        transaction: transaction);
   }
 
   @override
-  void updateCrew(Crew crew) async {
-    _update(crew.path, crew, Crew.toJson);
+  void updateCrew(Crew crew, {Transaction? transaction}) async {
+    _update(crew.path, crew, Crew.toJson, transaction: transaction);
   }
 
   @override
@@ -224,21 +246,31 @@ class FirestoreRaceService implements RaceService {
     return entity;
   }
 
-  void _update<T>(final String path, T entity,
-      JsonSerializationFunction<T> serializationFn) async {
+  void _update<T>(
+    final String path,
+    T entity,
+    JsonSerializationFunction<T> serializationFn, {
+    Transaction? transaction,
+  }) async {
     final documentReference = _db.doc(path);
-    await _db.runTransaction(
-      (transaction) async {
-        final snapshot = await transaction.get(documentReference);
-        if (!snapshot.exists) {
-          throw Exception('Entity at path $path does not exist');
-        }
-        transaction.update(documentReference, serializationFn(entity));
-      },
-    ).catchError(
-      // ignore: avoid_print, invalid_return_type_for_catch_error
-      (error) => print('Failed to update entity: $error'),
-    );
+
+    Transaction updateWithinTransaction(Transaction t) => t.update(
+          documentReference,
+          serializationFn(entity),
+        );
+
+    if (transaction != null) {
+      updateWithinTransaction(transaction);
+    } else {
+      await _db.runTransaction(
+        (transaction) async {
+          updateWithinTransaction(transaction);
+        },
+      ).catchError(
+        // ignore: avoid_print, invalid_return_type_for_catch_error
+        (error) => print('Failed to update entity: $error'),
+      );
+    }
   }
 
   Stream<T> _getDocumentStream<T>(

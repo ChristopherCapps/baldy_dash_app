@@ -7,21 +7,23 @@ import '../../model/player.dart';
 import '../../model/race.dart';
 import '../../model/session.dart';
 import '../../service/race_service.dart';
+import '../../service/service_registry.dart';
 import '../widget/async_builder_template.dart';
 import 'ready_page.dart';
 
 class CrewsPage extends StatelessWidget {
-  final Race race;
-  final Session session;
   final Engine engine;
   final RaceService raceService;
 
-  const CrewsPage(
-      {super.key,
-      required this.engine,
-      required this.raceService,
-      required this.race,
-      required this.session});
+  final Race race;
+  final Session session;
+
+  CrewsPage(final Race race, final Session session, {Key? key})
+      : this.custom(Engine.I, ServiceRegistry.I.raceService, race, session,
+            key: key);
+
+  const CrewsPage.custom(this.engine, this.raceService, this.race, this.session,
+      {super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(

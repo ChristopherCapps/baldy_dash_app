@@ -21,6 +21,12 @@ class FirestoreService {
     return FirestoreService._();
   }
 
+  Future<T> runTransaction<T>(
+          final TransactionHandler<T> transactionHandler) async =>
+      database
+          .runTransaction(transactionHandler)
+          .catchError((error) => print('Transaction failed: $error'));
+
   FirebaseFirestore get database => _db;
 
   static FirestoreService get I => FirestoreService._instance!;

@@ -30,6 +30,8 @@ abstract class RaceService {
   Stream<Crew> getCrewStreamById(
       String raceId, String sessionId, String crewId);
 
+  void assignPlayerToCrew(Crew crew);
+
   Future<Player> getPlayer();
 
   Stream<Player> getPlayerStream();

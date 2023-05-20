@@ -17,7 +17,7 @@ class Course extends Identity {
   Map<String, Object?> toJson() => _$CourseToJson(this);
 
   @override
-  List<Object?> get props => [name];
+  List<Object?> get props => [id, path, name];
 
   @override
   bool get stringify => true;

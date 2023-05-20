@@ -4,6 +4,7 @@ import '../../model/session.dart';
 import '../../service/race_service.dart';
 import '../../service/service_registry.dart';
 import '../widget/async_builder_template.dart';
+import 'races_page.dart';
 import 'racing_page.dart';
 
 //races/vtGu6oxrs1uTYvb919VZ/sessions/Fa9RChhdixCljmSSEJl0/crews/86NgJJCq8KgexwcLzPga
@@ -59,6 +60,14 @@ class ReadyPage extends StatelessWidget {
                               builder: (context) => RacingPage(racingSnapshot)))
                           : null,
                   child: const Text('LET\'S GO!'),
+                ),
+                ElevatedButton(
+                  onPressed: racingSnapshot.session.state ==
+                          SessionState.pending
+                      ? () => Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => RacesPage()))
+                      : null,
+                  child: const Text('START OVER'),
                 ),
               ],
             ),

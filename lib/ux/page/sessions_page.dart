@@ -72,12 +72,7 @@ class SessionsPage extends StatelessWidget {
       enabled: session.state != SessionState.completed,
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => CrewsPage(
-            engine: Engine.I,
-            raceService: raceService,
-            race: race,
-            session: session,
-          ),
+          builder: (context) => CrewsPage(race, session),
         ),
       ),
       title: Text(session.name),

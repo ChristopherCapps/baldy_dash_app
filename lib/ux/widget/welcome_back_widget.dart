@@ -7,6 +7,7 @@ import '../../model/session.dart';
 import '../../service/race_service.dart';
 import '../../service/service_registry.dart';
 
+import '../page/crews_page.dart';
 import '../page/races_page.dart';
 import '../page/racing_page.dart';
 import '../page/ready_page.dart';
@@ -117,21 +118,22 @@ class WelcomeBackWidget extends StatelessWidget {
           RaceTileWidget(racingSnapshot.race),
           Text('''You have joined the ${racingSnapshot.session.name} session 
               as a member of the "${racingSnapshot.crew.name}" crew.'''),
-          _rejoinRaceButton(context, () => ReadyPage(racingSnapshot))
+          _rejoinRaceButton(context,
+              () => CrewsPage(racingSnapshot.race, racingSnapshot.session))
         ],
       );
 
   Widget _letsPlayButton(final BuildContext context) => ElevatedButton(
-        onPressed: () async => await Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => RacesPage())),
+        onPressed: () async => await Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => RacesPage())),
         child: const Text('LET\'S PLAY!'),
       );
 
   Widget _rejoinRaceButton(
           final BuildContext context, final Widget Function() buttonTargetFx) =>
       ElevatedButton(
-        onPressed: () async => await Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => buttonTargetFx())),
+        onPressed: () async => await Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => buttonTargetFx())),
         child: const Text('REJOIN NOW'),
       );
 }

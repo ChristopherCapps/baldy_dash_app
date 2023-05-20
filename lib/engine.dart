@@ -49,21 +49,7 @@ class Engine {
           : null;
 
   void assignPlayerToCrew(final Crew crew) async {
-    // TODO: This should all be a transaction
-    if (player.crewPath != null) {
-      final currentCrew = await _raceService.getCrewByPath(player.crewPath!);
-      if (crew == currentCrew) return;
-
-      // Remove player from current crew and then save
-      currentCrew.players.remove(player.id);
-      _raceService.updateCrew(currentCrew);
-    }
-    // Add player to new crew and then save
-    crew.players.add(player.id);
-    _raceService.updateCrew(crew);
-    // Update the player's crew path and then save
-    final updatedPlayer = player.copyWith(crewPath: crew.path);
-    _raceService.updatePlayer(updatedPlayer);
+    _raceService.assignPlayerToCrew(crew);
   }
 
   static Engine get I => _instance!;
