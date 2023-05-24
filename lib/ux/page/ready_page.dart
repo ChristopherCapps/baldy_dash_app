@@ -54,11 +54,12 @@ class ReadyPage extends StatelessWidget {
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                   ),
-                  onPressed:
-                      racingSnapshot.session.state == SessionState.running
-                          ? () => Navigator.of(context).push(MaterialPageRoute(
+                  onPressed: racingSnapshot.session.state ==
+                          SessionState.running
+                      ? () => Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
                               builder: (context) => RacingPage(racingSnapshot)))
-                          : null,
+                      : null,
                   child: const Text('LET\'S GO!'),
                 ),
                 ElevatedButton(

@@ -182,6 +182,7 @@ class FirestoreRaceService implements RaceService {
       }
       // Add player to new crew and then save
       crew.players.add(player.id);
+      // todo: Consider crew.copyWith()
       updateCrew(crew, transaction: transaction);
       // Update the player's crew path and then save
       final updatedPlayer = player.copyWith(crewPath: crew.path);
