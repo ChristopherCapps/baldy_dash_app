@@ -7,7 +7,6 @@ import '../../model/session.dart';
 import '../../service/race_service.dart';
 import '../../service/service_registry.dart';
 
-import '../page/crews_page.dart';
 import '../page/races_page.dart';
 import '../page/racing_page.dart';
 import '../page/ready_page.dart';
@@ -118,8 +117,7 @@ class WelcomeBackWidget extends StatelessWidget {
           RaceTileWidget(racingSnapshot.race),
           Text('''You have joined the ${racingSnapshot.session.name} session 
               as a member of the "${racingSnapshot.crew.name}" crew.'''),
-          _rejoinRaceButton(context,
-              () => CrewsPage(racingSnapshot.race, racingSnapshot.session))
+          _rejoinRaceButton(context, () => ReadyPage(racingSnapshot))
         ],
       );
 

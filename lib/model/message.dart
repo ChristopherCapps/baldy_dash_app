@@ -8,15 +8,17 @@ part 'message.g.dart';
 @JsonSerializable()
 @immutable
 class Message extends Identity {
-  final String authorId;
+  final String fromPlayerId;
   final DateTime timestamp;
   final String text;
+  final String? toPlayerId;
   final String? photoUrl;
 
   const Message(super.id, super.path,
-      {required this.authorId,
+      {required this.fromPlayerId,
       required this.timestamp,
       required this.text,
+      this.toPlayerId,
       this.photoUrl});
 
   factory Message.fromJson(Map<String, dynamic> json) =>
@@ -25,7 +27,13 @@ class Message extends Identity {
   Map<String, Object?> toJson() => _$MessageToJson(this);
 
   @override
-  List<Object> get props => ['authorId', 'timestamp', 'text', 'photoUrl'];
+  List<Object> get props => [
+        'fromPlayerId',
+        'timestamp',
+        'text',
+        'toPlayerId',
+        'photoUrl',
+      ];
 
   @override
   bool get stringify => true;

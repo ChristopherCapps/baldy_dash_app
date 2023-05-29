@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../engine.dart';
 import '../../model/race.dart';
@@ -9,21 +10,23 @@ import '../widget/async_builder_template.dart';
 import 'crews_page.dart';
 
 class SessionsPage extends StatelessWidget {
-  final Race race;
-  final RaceService raceService;
+  final Race _race;
+  final Engine _engine;
+  final RaceService _raceService;
 
   SessionsPage(final Race race, {Key? key})
-      : this.custom(ServiceRegistry.I.raceService, race, key: key);
+      : this.custom(Engine.I, ServiceRegistry.I.raceService, race, key: key);
 
-  const SessionsPage.custom(this.raceService, this.race, {super.key});
+  const SessionsPage.custom(this._engine, this._raceService, this._race,
+      {super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Column(
             children: [
-              Text(race.name),
-              Text(race.tagLineOrDefault,
+              Text(_race.name),
+              Text(_race.tagLineOrDefault,
                   style: const TextStyle(
                     fontSize: 12,
                   )),
@@ -46,7 +49,7 @@ class SessionsPage extends StatelessWidget {
 
   AsyncBuilderTemplate<List<Session>> sessionsWidget() =>
       AsyncBuilderTemplate<List<Session>>(
-        stream: raceService.getSessions(race),
+        stream: _raceService.getSessions(_race),
         builder: (context, sessions) {
           if (sessions!.isEmpty) {
             return const Text('No sessions are available for this race.');
@@ -57,8 +60,13 @@ class SessionsPage extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   itemCount: sessions.length,
-                  itemBuilder: (context, index) =>
-                      sessionListTile(context, sessions[index]),
+                  itemBuilder: (context, index) => FutureBuilder(
+                    future: sessionListTile(context, sessions[index]),
+                    builder: (context, sessionTileSnapshot) =>
+                        sessionTileSnapshot.hasData
+                            ? sessionTileSnapshot.data!
+                            : const Text('Loading...'),
+                  ),
                 ),
               ),
             ],
@@ -66,22 +74,23 @@ class SessionsPage extends StatelessWidget {
         },
       );
 
-  ListTile sessionListTile(BuildContext context, Session session) {
+  Future<ListTile> sessionListTile(
+      BuildContext context, Session session) async {
     print('Render session: $session');
     return ListTile(
       enabled: session.state != SessionState.completed,
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => CrewsPage(race, session),
+          builder: (context) => CrewsPage(_race, session),
         ),
       ),
       title: Text(session.name),
       subtitle: Text(session.tagLineOrDefault),
-      trailing: _sessionStatusWidget(session),
+      trailing: await _sessionStatusWidget(session),
     );
   }
 
-  Column _sessionStatusWidget(final Session session) => Column(
+  Future<Column> _sessionStatusWidget(final Session session) async => Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -93,9 +102,19 @@ class SessionsPage extends StatelessWidget {
               SessionState.running: 'HAPPENING NOW!'
             }[session.state]!,
           ),
-          Text('Started 23 minutes ago')
+          Text(switch (session.state) {
+            SessionState.paused ||
+            SessionState.running =>
+              'Started at ${DateFormat('jm').format(session.startTime!)}',
+            SessionState.completed => await _completedText(session),
+            SessionState.pending => 'Get Ready!',
+          }),
         ],
       );
+
+  Future<String> _completedText(final Session session) async => _engine
+      .getWinningCrew(session)
+      .then((crew) => crew != null ? 'Won by ${crew.name}' : 'Unknown winner');
 
   Container banner() => Container(
         padding: const EdgeInsets.only(bottom: 18.0),

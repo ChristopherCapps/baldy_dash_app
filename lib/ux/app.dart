@@ -14,6 +14,10 @@ class BaldyDashApp extends StatelessWidget {
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
     return MaterialApp(
+      // theme: ThemeData(
+      //   useMaterial3: true,
+      //   colorSchemeSeed: Colors.teal,
+      // ),
       home: _welcomePage(),
     );
   }
