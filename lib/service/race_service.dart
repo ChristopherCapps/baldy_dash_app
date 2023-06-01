@@ -1,6 +1,6 @@
 import '../model/course.dart';
 import '../model/crew.dart';
-
+import '../model/message.dart';
 import '../model/player.dart';
 import '../model/race.dart';
 import '../model/session.dart';
@@ -32,18 +32,20 @@ abstract class RaceService {
 
   void assignPlayerToCrew(Crew crew);
 
-  Future<Player> getPlayer();
+  void removePlayerFromCrew();
+
+  Future<Player> getPlayer({String? id});
 
   Stream<Player> getPlayerStream();
 
-  Future<Player> getOtherPlayer(String id);
-
   Stream<Map<String, Waypoint>> getWaypointsStreamById(
-      final String raceId, final String courseId);
+      String raceId, String courseId);
 
   Stream<Map<String, Waypoint>> getWaypoints(Race race, Course course);
 
-  Future<Player> createPlayer(Role role, String name);
+  Future<Message> createMessage(
+      Player fromPlayer, String toPlayerId, String text,
+      {String? photoUrl});
 
   void updatePlayer(Player player);
 
@@ -51,8 +53,14 @@ abstract class RaceService {
 
   Future<Set<Player>> getPlayers(Crew crew);
 
-  Stream<Set<String>> getPlayersForCrew(
-      final Race race, final Session session, final Crew crew);
+  Stream<Set<String>> getPlayersForCrew(Race race, Session session, Crew crew);
+
+  Stream<List<Message>> getMessagesStreamById(
+    String raceId,
+    String sessionId,
+    String crewId, {
+    int? limit,
+  });
 
   DecomposedCrewPath getDecomposedCrewPath(String crewPath);
 

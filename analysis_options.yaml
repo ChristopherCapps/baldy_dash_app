@@ -23,7 +23,6 @@ linter:
   # producing the lint.
   rules:
     - always_declare_return_types
-    - avoid_print: false
     - avoid_unused_constructor_parameters
     - directives_ordering
     - omit_local_variable_types

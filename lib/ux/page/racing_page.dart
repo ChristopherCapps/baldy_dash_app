@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../model/crew.dart';
+import '../../model/message.dart';
 import '../../model/race.dart';
 import '../../model/session.dart';
 import '../../model/waypoint.dart';
@@ -9,6 +10,7 @@ import '../../service/race_service.dart';
 import '../../service/service_registry.dart';
 
 import '../widget/async_builder_template.dart';
+import '../widget/message_widget.dart';
 import '../widget/waypoint_widget.dart';
 
 class RacingPage extends StatelessWidget {
@@ -43,48 +45,53 @@ class RacingPage extends StatelessWidget {
           length: 2,
           child: Scaffold(
             appBar: AppBar(
-              title: Column(
-                children: [
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Text(
-                      '${snapshot!.race.name}: ${snapshot.race.tagLineOrDefault}'),
-                  Text(
-                    '${snapshot.session.name} / ${snapshot.crew.name}',
-                    style: const TextStyle(
-                      fontSize: 12,
+              toolbarHeight: kToolbarHeight + 10.0,
+              // title: Column(
+              //   children: [
+              //     const SizedBox(
+              //       height: 30,
+              //     ),
+              //     Text(
+              //         '${snapshot!.race.name}: ${snapshot.race.tagLineOrDefault}'),
+              //     Text(
+              //       '${snapshot.session.name} / ${snapshot.crew.name}',
+              //       style: const TextStyle(
+              //         fontSize: 12,
+              //       ),
+              //     ),
+              //     const SizedBox(
+              //       height: 20,
+              //     ),
+              //   ],
+              // ),
+
+              flexibleSpace: const SafeArea(
+                child: TabBar(
+                  padding: EdgeInsets.only(top: 10.0),
+                  tabs: [
+                    Tab(
+                      icon: Icon(Icons.directions_run),
+                      text: 'Race',
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                ],
-              ),
-              bottom: const TabBar(
-                tabs: [
-                  Tab(
-                    icon: Icon(Icons.directions_run),
-                    text: 'Race',
-                  ),
-                  Tab(
+                    Tab(
 //mark_chat_unread
-                    icon: Icon(Icons.chat_bubble),
-                    text: 'Messages',
-                  ),
-                ],
+                      icon: Icon(Icons.chat_bubble),
+                      text: 'Messages',
+                    ),
+                  ],
+                ),
               ),
             ),
             body: TabBarView(
               children: [
                 gamingWidget(
                   context,
-                  snapshot.race,
+                  snapshot!.race,
                   snapshot.session,
                   snapshot.crew,
                   snapshot.waypoints,
                 ),
-                const Icon(Icons.message),
+                messagingWidget(context),
               ],
             ),
           ),
@@ -105,44 +112,25 @@ class RacingPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             WaypointWidget(waypoints[crew.waypointId]!),
-            const SizedBox(
-              height: 50.0,
-            ),
-            Text(
-              'RESPONSE',
-              style: TextStyle(
-                color: Theme.of(context).primaryColorDark,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2.0,
-              ),
-            ),
-            const SizedBox(
-              height: 15.0,
-            ),
-            const TextField(
-              decoration: InputDecoration(
-                filled: true,
-              ),
-              style: TextStyle(
-                fontSize: 24,
-              ),
-            ),
-            const SizedBox(
-              height: 25.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  child: const Text('SUBMIT'),
-                  onPressed: () => {},
-                ),
-              ],
-            ),
           ],
         ),
       );
 
-  //Widget messagingWidget(final BuildContext context) =>
+  final List<Message> _messages = [
+    Message(
+      '1',
+      '1',
+      fromPlayerId: '2',
+      timestamp: DateTime.now(),
+      text:
+          'Our crew guesses \'rosebud\' for this clue. Are we right? I dont know but I want to see how long this text can get.',
+    ),
+  ];
+
+  Widget messagingWidget(final BuildContext context) => Expanded(
+        child: ListView.builder(
+          itemCount: _messages.length,
+          itemBuilder: (context, index) => MessageWidget(_messages[index]),
+        ),
+      );
 }

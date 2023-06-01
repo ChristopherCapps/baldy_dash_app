@@ -33,11 +33,18 @@ class WelcomeBackWidget extends StatelessWidget {
         body: Container(
           padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 35.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text('We\'re glad to see you again, ${_player.name}.'),
-              _player.crewPath != null
+              Text(
+                'We\'re glad to see you again, ${_player.name}.',
+                style: const TextStyle(fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              _player.crewPath != null && _player.crewPath!.isNotEmpty
                   ? _buildPriorSessionWidget()
                   : _buildPriorVisitWidget(context),
             ],
@@ -104,7 +111,10 @@ class WelcomeBackWidget extends StatelessWidget {
           RaceTileWidget(racingSnapshot.race),
           Text('''You have joined the ${racingSnapshot.session.name} session 
               as a member of the "${racingSnapshot.crew.name}" crew.'''),
-          _rejoinRaceButton(context, () => RacingPage(racingSnapshot)),
+          Row(children: [
+            _rejoinRaceButton(context, () => RacingPage(racingSnapshot)),
+            _leaveRaceButton(context),
+          ]),
         ],
       );
 
@@ -134,4 +144,15 @@ class WelcomeBackWidget extends StatelessWidget {
             MaterialPageRoute(builder: (context) => buttonTargetFx())),
         child: const Text('REJOIN NOW'),
       );
+
+  Widget _leaveRaceButton(final BuildContext context) => ElevatedButton(
+        onPressed: () async => _leaveRace(context),
+        child: const Text('LEAVE RACE'),
+      );
+
+  void _leaveRace(final BuildContext context) async {
+    _raceService.removePlayerFromCrew();
+    await Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (context) => RacesPage()));
+  }
 }

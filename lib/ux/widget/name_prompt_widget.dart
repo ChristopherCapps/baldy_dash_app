@@ -24,14 +24,12 @@ class _NamePromptWidget extends State<NamePromptWidget> {
     super.dispose();
   }
 
-  void updatePlayer(final String name) {}
-
   @override
   Widget build(BuildContext context) => TextField(
         controller: _controller,
         textCapitalization: TextCapitalization.words,
         maxLength: 20,
-        //autofocus: true,
+        autofocus: true,
         decoration: const InputDecoration(helperText: 'Your Dasher name'),
         onSubmitted: widget.onSubmitted,
       );

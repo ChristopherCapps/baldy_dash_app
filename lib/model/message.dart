@@ -24,7 +24,8 @@ class Message extends Identity {
   factory Message.fromJson(Map<String, dynamic> json) =>
       _$MessageFromJson(json);
 
-  Map<String, Object?> toJson() => _$MessageToJson(this);
+  static Map<String, Object?> toJson(final Message message) =>
+      _$MessageToJson(message);
 
   @override
   List<Object> get props => [

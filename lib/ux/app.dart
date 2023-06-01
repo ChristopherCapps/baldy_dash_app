@@ -14,6 +14,7 @@ class BaldyDashApp extends StatelessWidget {
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       // theme: ThemeData(
       //   useMaterial3: true,
       //   colorSchemeSeed: Colors.teal,

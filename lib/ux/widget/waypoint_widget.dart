@@ -30,7 +30,7 @@ class WaypointWidget extends StatelessWidget {
                   ),
                   Text(
                     _waypoint.id,
-                    style: const TextStyle(fontSize: 48),
+                    style: const TextStyle(fontSize: 36),
                   ),
                 ],
               ),
@@ -67,6 +67,41 @@ class WaypointWidget extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 24.0,
                   ),
+                ),
+                const SizedBox(
+                  height: 50.0,
+                ),
+                Text(
+                  'RESPONSE',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColorDark,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2.0,
+                  ),
+                ),
+                const SizedBox(
+                  height: 15.0,
+                ),
+                const TextField(
+                  decoration: InputDecoration(
+                    filled: true,
+                  ),
+                  style: TextStyle(
+                    fontSize: 24,
+                  ),
+                ),
+                const SizedBox(
+                  height: 25.0,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      child: const Text('SUBMIT'),
+                      onPressed: () => {},
+                    ),
+                  ],
                 ),
               ],
             ),
