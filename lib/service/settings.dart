@@ -12,8 +12,8 @@ class Settings {
     }
   }
 
-  String get uuid => '2';
-  //'f2b9b4b0-d993-11ed-83f3-e7422e01ce10';
+  String get uuid => //'2';
+      'f2b9b4b0-d993-11ed-83f3-e7422e01ce10';
   //_prefs.getString(_uuid)!;
 
   static Future<Settings> create() async =>

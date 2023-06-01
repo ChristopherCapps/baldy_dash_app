@@ -27,6 +27,7 @@ class _NamePromptWidget extends State<NamePromptWidget> {
   @override
   Widget build(BuildContext context) => TextField(
         controller: _controller,
+        style: const TextStyle(fontSize: 24),
         textCapitalization: TextCapitalization.words,
         maxLength: 20,
         autofocus: true,

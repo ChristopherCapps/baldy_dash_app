@@ -39,6 +39,9 @@ class ErrorMessageWidget extends StatelessWidget {
                 .titleLarge!
                 .copyWith(color: Colors.black),
           ),
+          const SizedBox(
+            height: 30,
+          ),
           Text(
             details ?? '',
             style: const TextStyle(fontStyle: FontStyle.italic),

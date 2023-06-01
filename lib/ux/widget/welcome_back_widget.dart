@@ -31,7 +31,7 @@ class WelcomeBackWidget extends StatelessWidget {
           title: const Text('Welcome back, dasher!'),
         ),
         body: Container(
-          padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 35.0),
+          padding: const EdgeInsets.only(left: 20.0, right: 20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -53,10 +53,14 @@ class WelcomeBackWidget extends StatelessWidget {
       );
 
   Widget _buildPriorVisitWidget(final BuildContext context) => Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text('Looks like you need to join a race!'),
+          const Text(
+            'Looks like you need to join a race!',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 30),
           _letsPlayButton(context),
         ],
       );
@@ -109,8 +113,8 @@ class WelcomeBackWidget extends StatelessWidget {
           const Text(
               'It looks like you were last running this race, which is still underway!'),
           RaceTileWidget(racingSnapshot.race),
-          Text('''You have joined the ${racingSnapshot.session.name} session 
-              as a member of the "${racingSnapshot.crew.name}" crew.'''),
+          Text(
+              'You have joined the ${racingSnapshot.session.name} session as a member of the "${racingSnapshot.crew.name}" crew.'),
           Row(children: [
             _rejoinRaceButton(context, () => RacingPage(racingSnapshot)),
             _leaveRaceButton(context),
