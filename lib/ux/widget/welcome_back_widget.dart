@@ -31,9 +31,9 @@ class WelcomeBackWidget extends StatelessWidget {
           title: const Text('Welcome back, dasher!'),
         ),
         body: Container(
-          padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+          padding: const EdgeInsets.only(top: 35.0, left: 20.0, right: 20.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
@@ -75,6 +75,7 @@ class WelcomeBackWidget extends StatelessWidget {
         crewPath.crewId,
       ),
       builder: (context, racingSnapshot) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           switch (racingSnapshot!.session.state) {
             SessionState.completed =>
@@ -109,16 +110,37 @@ class WelcomeBackWidget extends StatelessWidget {
   Widget _buildActivePriorSessionWidget(
           final BuildContext context, final RacingSnapshot racingSnapshot) =>
       Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          const SizedBox(height: 20.0),
           const Text(
               'It looks like you were last running this race, which is still underway!'),
-          RaceTileWidget(racingSnapshot.race),
-          Text(
-              'You have joined the ${racingSnapshot.session.name} session as a member of the "${racingSnapshot.crew.name}" crew.'),
-          Row(children: [
-            _rejoinRaceButton(context, () => RacingPage(racingSnapshot)),
-            _leaveRaceButton(context),
-          ]),
+          const SizedBox(height: 15.0),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+              color: Theme.of(context).highlightColor,
+            ),
+            child: RaceTileWidget(racingSnapshot.race),
+          ),
+          const SizedBox(height: 15.0),
+          SizedBox(
+            width: 350.0,
+            child: Text(
+              'You have joined the ${racingSnapshot.session.name} session as a member of the "${racingSnapshot.crew.name}" crew.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 35.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _rejoinRaceButton(context, () => RacingPage(racingSnapshot)),
+              const SizedBox(width: 20.0),
+              _leaveRaceButton(context),
+            ],
+          ),
         ],
       );
 
@@ -155,7 +177,7 @@ class WelcomeBackWidget extends StatelessWidget {
       );
 
   void _leaveRace(final BuildContext context) async {
-    _raceService.removePlayerFromCrew();
+    _raceService.removePlayerFromCrew(_player);
     await Navigator.of(context)
         .pushReplacement(MaterialPageRoute(builder: (context) => RacesPage()));
   }

@@ -7,6 +7,7 @@ import 'service/service_registry.dart';
 import 'ux/app.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   final serviceRegistry = await ServiceRegistry.bootstrap();
   print('Loaded settings: ${serviceRegistry.settings.uuid}');
   final engine = await Engine.initialize(ServiceRegistry.I.raceService);

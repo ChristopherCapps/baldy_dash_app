@@ -127,10 +127,8 @@ class RacingPage extends StatelessWidget {
     ),
   ];
 
-  Widget messagingWidget(final BuildContext context) => Expanded(
-        child: ListView.builder(
-          itemCount: _messages.length,
-          itemBuilder: (context, index) => MessageWidget(_messages[index]),
-        ),
+  Widget messagingWidget(final BuildContext context) => ListView.builder(
+        itemCount: _messages.length,
+        itemBuilder: (context, index) => MessageWidget(_messages[index]),
       );
 }

@@ -19,7 +19,9 @@ abstract class RaceService {
 
   Stream<Session> getSessionStreamById(String raceId, String sessionId);
 
-  Stream<List<Crew>> getCrews(Race race, Session session);
+  Stream<List<Crew>> getSessionCrews(Race race, Session session);
+
+  Future<List<Crew>> getSessionCrewsById(String raceId, String sessionId);
 
   Future<Crew> getCrewById(String raceId, String sessionId, String crewId);
 
@@ -30,9 +32,9 @@ abstract class RaceService {
   Stream<Crew> getCrewStreamById(
       String raceId, String sessionId, String crewId);
 
-  void assignPlayerToCrew(Crew crew);
+  void assignPlayerToCrew(Player player, Crew crew);
 
-  void removePlayerFromCrew();
+  void removePlayerFromCrew(Player player);
 
   Future<Player> getPlayer({String? id});
 

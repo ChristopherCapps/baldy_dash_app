@@ -25,7 +25,7 @@ class MessageWidget extends StatelessWidget {
   Widget build(BuildContext context) => AsyncBuilderTemplate(
         future: _fromPlayer,
         builder: (context, player) => Container(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.fromLTRB(20.0, 35.0, 20.0, 0.0),
           child: ListTile(
             title: Text(
               player!.name.toUpperCase(),

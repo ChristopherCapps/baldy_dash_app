@@ -82,7 +82,8 @@ class FirestoreRaceService implements RaceService {
       '${_waypointsPath(raceId, courseId)}/$waypointId';
 
   @override
-  Stream<List<Race>> getRaces() => _getCollection(_racesPath(), Race.fromJson);
+  Stream<List<Race>> getRaces() =>
+      _getCollectionStream(_racesPath(), Race.fromJson);
 
   @override
   Future<Race> getRaceById(final String raceId) async => await _getDocument(
@@ -107,7 +108,7 @@ class FirestoreRaceService implements RaceService {
   @override
   Stream<Map<String, Waypoint>> getWaypointsStreamById(
           final String raceId, final String courseId) =>
-      _getCollection(_waypointsPath(raceId, courseId), Waypoint.fromJson)
+      _getCollectionStream(_waypointsPath(raceId, courseId), Waypoint.fromJson)
           .map<Map<String, Waypoint>>((waypoints) =>
               {for (var waypoint in waypoints) waypoint.id: waypoint});
 
@@ -135,11 +136,15 @@ class FirestoreRaceService implements RaceService {
 
   @override
   Stream<List<Session>> getSessions(final Race race) =>
-      _getCollection(_sessionsPath(race.id), Session.fromJson);
+      _getCollectionStream(_sessionsPath(race.id), Session.fromJson);
 
   @override
-  Stream<List<Crew>> getCrews(final Race race, final Session session) =>
-      _getCollection(_crewsPath(race.id, session.id), Crew.fromJson);
+  Stream<List<Crew>> getSessionCrews(final Race race, final Session session) =>
+      _getCollectionStream(_crewsPath(race.id, session.id), Crew.fromJson);
+
+  @override
+  Future<List<Crew>> getSessionCrewsById(String raceId, String sessionId) =>
+      _getCollection(_crewsPath(raceId, sessionId), Crew.fromJson);
 
   @override
   Stream<Player> getPlayerStream() => _db
@@ -190,15 +195,18 @@ class FirestoreRaceService implements RaceService {
     final String crewId, {
     int? limit,
   }) =>
-      _getCollection(
+      _getCollectionStream(
         _messagesPath(raceId, sessionId, crewId),
         Message.fromJson,
         limit: limit,
       );
 
+  bool _stringNotNullOrEmpty(final String? str) =>
+      str != null && str.isNotEmpty;
+
   void _removePlayerFromCrew(final Player player,
       {final Transaction? transaction}) async {
-    if (player.crewPath != null) {
+    if (_stringNotNullOrEmpty(player.crewPath)) {
       final currentCrew = await getCrewByPath(player.crewPath!);
       // Remove player from current crew and then save
       currentCrew.players.remove(player.id);
@@ -207,10 +215,9 @@ class FirestoreRaceService implements RaceService {
   }
 
   @override
-  void assignPlayerToCrew(final Crew crew) async {
+  void assignPlayerToCrew(final Player player, final Crew crew) async {
     await FirestoreService.I.runTransaction(
       (transaction) async {
-        final player = await getPlayer();
         _removePlayerFromCrew(player, transaction: transaction);
         // Add player to new crew and then save
         crew.players.add(player.id);
@@ -224,10 +231,9 @@ class FirestoreRaceService implements RaceService {
   }
 
   @override
-  void removePlayerFromCrew() async {
+  void removePlayerFromCrew(final Player player) async {
     await FirestoreService.I.runTransaction(
       (transaction) async {
-        final player = await getPlayer();
         _removePlayerFromCrew(player, transaction: transaction);
         updatePlayer(player.copyWith(crewPath: ''), transaction: transaction);
       },
@@ -304,7 +310,7 @@ class FirestoreRaceService implements RaceService {
     final pattern = RegExp(r'races\/(\w+)\/sessions\/(\w+)\/crews\/(\w+)');
 
     if (!pattern.hasMatch(crewPath)) {
-      throw Exception('Invalid input format');
+      throw Exception('Invalid input format: "$crewPath"');
     }
 
     final match = pattern.firstMatch(crewPath)!;
@@ -406,8 +412,21 @@ class FirestoreRaceService implements RaceService {
     return jsonFactoryFn(data);
   }
 
-  Stream<List<T>> _getCollection<T>(
-          final String path, JsonFactoryFunction<T> jsonFactoryFn,
+  Future<List<T>> _getCollection<T>(
+          final String path, final JsonFactoryFunction<T> jsonFactoryFn,
+          {int? limit}) async =>
+      _db.collection(path).limit(limit ?? 100).get().then(
+            (querySnapshots) => querySnapshots.docs.fold<List<T>>(
+              [],
+              (documents, doc) => [
+                ...documents,
+                _deserializeDocument(doc, jsonFactoryFn),
+              ],
+            ),
+          );
+
+  Stream<List<T>> _getCollectionStream<T>(
+          final String path, final JsonFactoryFunction<T> jsonFactoryFn,
           {int? limit}) =>
       _db.collection(path).limit(limit ?? 100).snapshots().map(
             (snapshot) => snapshot.docs.fold<List<T>>(

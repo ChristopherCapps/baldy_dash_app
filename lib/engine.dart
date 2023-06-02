@@ -49,7 +49,7 @@ class Engine {
           : null;
 
   void assignPlayerToCrew(final Crew crew) async {
-    _raceService.assignPlayerToCrew(crew);
+    _raceService.assignPlayerToCrew(player, crew);
   }
 
   static Engine get I => _instance!;

@@ -37,7 +37,7 @@ class WaypointWidget extends StatelessWidget {
               trailing: Text(
                 '${_waypoint.region}',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 12,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2.0,
@@ -54,7 +54,7 @@ class WaypointWidget extends StatelessWidget {
                   'CLUE',
                   style: TextStyle(
                     color: Theme.of(context).primaryColorDark,
-                    fontSize: 18,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2.0,
                   ),
@@ -65,7 +65,7 @@ class WaypointWidget extends StatelessWidget {
                 Text(
                   _waypoint.clue,
                   style: const TextStyle(
-                    fontSize: 24.0,
+                    fontSize: 18.0,
                   ),
                 ),
                 const SizedBox(
@@ -75,7 +75,7 @@ class WaypointWidget extends StatelessWidget {
                   'RESPONSE',
                   style: TextStyle(
                     color: Theme.of(context).primaryColorDark,
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2.0,
                   ),
@@ -86,9 +86,10 @@ class WaypointWidget extends StatelessWidget {
                 const TextField(
                   decoration: InputDecoration(
                     filled: true,
+                    border: UnderlineInputBorder(),
                   ),
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 18,
                   ),
                 ),
                 const SizedBox(
