@@ -278,99 +278,111 @@ class FirestoreRaceService implements RaceService {
     );
   }
 
-  // @override
-  // Future<Message> createMessage(
-  //     MessageSenderType messageSenderType,
-  //     MessageReceiverType messageReceiverType,
-  //     String receivingCrewPath,
-  //     String text,
-  //     {String? sendingPlayerId,
-  //     String? receivingPlayerId,
-  //     String? photoUrl}) async {
-  //       // start here
-  //   if (messageSenderType == MessageSenderType.player && sendingPlayerId == null) {
-  //     throw ArgumentError(
-  //       'A senderId must be provided when the sender type is player.',
-  //       'senderId',
-  //     );
-  //   }
-
-  //   final receivingCrewId = switch (messageReceiverType) {
-  //     MessageReceiverType.crew => receiverId,
-  //     MessageReceiverType.player =>
-
-  //   }
-
-  //   final decomposedCrewPath = getDecomposedCrewPath(fromPlayer.crewPath!);
-  //   final uuid = _getUniqueId();
-  //   final path = _messagePath(decomposedCrewPath.raceId,
-  //       decomposedCrewPath.sessionId, decomposedCrewPath.crewId, uuid);
-
-  //   return await _create(
-  //     _messagesPath(
-  //       decomposedCrewPath.raceId,
-  //       decomposedCrewPath.sessionId,
-  //       decomposedCrewPath.crewId,
-  //     ),
-  //     Message(
-  //       uuid,
-  //       path,
-  //       fromPlayerId: fromPlayer.id,
-  //       timestamp: DateTime.now(),
-  //       text: text,
-  //       toPlayerId: toPlayerId,
-  //       photoUrl: photoUrl,
-  //     ),
-  //     Message.toJson,
-  //   );
-  // }
-
-  Message _createMessage(
-      final Race race,
-      final Session session,
-      final Crew receivingCrew,
-      final String text,
-      final MessageSenderType messageSenderType,
-      final MessageReceiverType messageReceiverType,
-      {final Player? sendingPlayer,
-      final String? receivingPlayerId,
-      final String? photoUrl}) {
-    final messageId = const Uuid().v1();
-    final messagePath = _messagePath(
-      race.id,
-      session.id,
-      receivingCrew.id,
-      messageId,
-    );
-    return Message(
-      messageId,
-      messagePath,
-      timestamp: DateTime.now(),
-      messageSenderType: MessageSenderType.player,
-      sendingPlayerId: sendingPlayer?.id,
-      text: text,
-      messageReceiverType: MessageReceiverType.crew,
-    );
-  }
-
   Future<List<Crew>> _getCrews(final Race race, final Session session) =>
       _getCollection(_crewsPath(race.id, session.id), Crew.fromJson);
+
+  String _messagesPathForSnapshot(final RacingSnapshot racingSnapshot) =>
+      _messagesPath(
+        racingSnapshot.race.id,
+        racingSnapshot.session.id,
+        racingSnapshot.crew.id,
+      );
 
   @override
   Future<void> sendTaunt(
     final Player fromPlayer,
-    final Race race,
-    final Session session,
-    final Crew fromCrew,
+    final RacingSnapshot fromRacingSnapshot,
     final String text,
   ) async =>
-      _getCrews(race, session).then((allCrewsInThisSession) =>
-          allCrewsInThisSession
-              .takeWhile((crew) => crew.id != fromCrew.id)
+      _getCrews(fromRacingSnapshot.race, fromRacingSnapshot.session).then(
+          (allCrewsInThisSession) => allCrewsInThisSession
+              .where((crew) => crew.id != fromRacingSnapshot.crew.id)
               .forEach((crew) => _create(
-                  _messagesPath(race.id, session.id, crew.id),
+                  _messagesPathForSnapshot(fromRacingSnapshot),
                   Message.now(fromPlayer.name, text),
                   Message.toJson)));
+
+  Future<Message> sendMessageFromGameMasterToPlayer(
+    final Player toPlayer,
+    final RacingSnapshot toRacingSnapshot,
+    final String text, {
+    final String? photoUrl,
+  }) async =>
+      _sendMessageToPlayer(
+        'GAME MASTER',
+        toPlayer,
+        toRacingSnapshot,
+        text,
+        photoUrl: photoUrl,
+      );
+
+  Future<Message> sendMessageFromRaceToPlayer(
+    final Player toPlayer,
+    final RacingSnapshot toRacingSnapshot,
+    final String text, {
+    final String? photoUrl,
+  }) async =>
+      _sendMessageToPlayer(
+        'BALDY DASH',
+        toPlayer,
+        toRacingSnapshot,
+        text,
+        photoUrl: photoUrl,
+      );
+
+  Future<Message> _sendMessageToPlayer(
+    final String senderName,
+    final Player toPlayer,
+    final RacingSnapshot toRacingSnapshot,
+    final String text, {
+    final String? photoUrl,
+  }) async =>
+      _create(
+        _messagesPathForSnapshot(toRacingSnapshot),
+        Message.now(
+          senderName,
+          text,
+          toPlayerId: toPlayer.id,
+          photoUrl: photoUrl,
+        ),
+        Message.toJson,
+      );
+
+  Future<Message> sendMessageFromRaceToCrew(
+          final RacingSnapshot toRacingSnapshot,
+          final String text,
+          final String? photoUrl) async =>
+      _sendMessageToCrew(
+        'BALDY DASH',
+        toRacingSnapshot,
+        text,
+        photoUrl,
+      );
+
+  Future<Message> sendMessageFromGameMasterToCrew(
+          final RacingSnapshot toRacingSnapshot,
+          final String text,
+          final String? photoUrl) async =>
+      _sendMessageToCrew(
+        'GAME MASTER',
+        toRacingSnapshot,
+        text,
+        photoUrl,
+      );
+
+  Future<Message> _sendMessageToCrew(
+          final String senderName,
+          final RacingSnapshot toRacingSnapshot,
+          final String text,
+          final String? photoUrl) async =>
+      _create(
+          _messagesPathForSnapshot(toRacingSnapshot),
+          Message.now(
+            senderName,
+            text,
+            photoUrl: photoUrl,
+          ),
+          Message.toJson);
 
   @override
   void updatePlayer(final Player player, {Transaction? transaction}) async {

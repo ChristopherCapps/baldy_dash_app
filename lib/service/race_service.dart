@@ -45,8 +45,11 @@ abstract class RaceService {
 
   Stream<Map<String, Waypoint>> getWaypoints(Race race, Course course);
 
-  Future<Message> sendTaunt(
-      Player fromPlayer, Race race, Session session, String text);
+  Future<void> sendTaunt(
+    final Player fromPlayer,
+    final RacingSnapshot fromRacingSnapshot,
+    final String text,
+  );
 
   void updatePlayer(Player player);
 
