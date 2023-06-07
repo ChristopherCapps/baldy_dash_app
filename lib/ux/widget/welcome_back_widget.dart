@@ -31,10 +31,11 @@ class WelcomeBackWidget extends StatelessWidget {
           title: const Text('Welcome back, dasher!'),
         ),
         body: Container(
-          padding: const EdgeInsets.only(top: 35.0, left: 20.0, right: 20.0),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.only(left: 20.0, right: 20.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            //crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 'We\'re glad to see you again, ${_player.name}.',
@@ -54,7 +55,7 @@ class WelcomeBackWidget extends StatelessWidget {
 
   Widget _buildPriorVisitWidget(final BuildContext context) => Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        //crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
             'Looks like you need to join a race!',
@@ -95,13 +96,20 @@ class WelcomeBackWidget extends StatelessWidget {
       AsyncBuilderTemplate(
         future: _engine.getWinningCrew(snapshot.session),
         builder: (context, crew) => Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          //crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('''
-              This race finished at 
-              ${DateFormat("MMMM d, y").format(snapshot.session.completedTime!)} 
-              ${crew != null ? "and was won by ${crew.name}" : "but the winner hasn't been recorded"}.'''),
+            const SizedBox(height: 15.0),
+            _buildRaceTileWidget(context, snapshot),
+            const SizedBox(height: 15.0),
+            SizedBox(
+              width: 350.0,
+              child: Text(
+                'Your last race finished on ${DateFormat("MMMM d, y").format(snapshot.session.completedTime!)}.\n${crew != null ? "It was won by ${crew.name}" : "but the winner hasn't been recorded"}.',
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 30),
             _letsPlayButton(context),
           ],
         ),
@@ -117,13 +125,7 @@ class WelcomeBackWidget extends StatelessWidget {
           const Text(
               'It looks like you were last running this race, which is still underway!'),
           const SizedBox(height: 15.0),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-              color: Theme.of(context).highlightColor,
-            ),
-            child: RaceTileWidget(racingSnapshot.race),
-          ),
+          _buildRaceTileWidget(context, racingSnapshot),
           const SizedBox(height: 15.0),
           SizedBox(
             width: 350.0,
@@ -144,15 +146,34 @@ class WelcomeBackWidget extends StatelessWidget {
         ],
       );
 
+  Widget _buildRaceTileWidget(
+          final BuildContext context, final RacingSnapshot racingSnapshot) =>
+      Container(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+          color: Theme.of(context).highlightColor,
+        ),
+        child: RaceTileWidget(racingSnapshot.race),
+      );
+
   Widget _buildPendingPriorSessionWidget(
           final BuildContext context, final RacingSnapshot racingSnapshot) =>
       Column(
         children: [
           const Text(
-              'It looks like you were last preparing to run this race, which has not yet started.'),
+            'It looks like you were last preparing to run this race, '
+            'which has not yet started.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 15.0),
           RaceTileWidget(racingSnapshot.race),
-          Text('''You have joined the ${racingSnapshot.session.name} session 
-              as a member of the "${racingSnapshot.crew.name}" crew.'''),
+          const SizedBox(height: 15.0),
+          Text(
+            'You have joined the ${racingSnapshot.session.name} session '
+            'as a member of the "${racingSnapshot.crew.name}" crew.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20.0),
           _rejoinRaceButton(context, () => ReadyPage(racingSnapshot))
         ],
       );

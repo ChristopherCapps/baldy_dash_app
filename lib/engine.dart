@@ -1,6 +1,7 @@
 import 'model/crew.dart';
 import 'model/player.dart';
 import 'model/session.dart';
+import 'model/race.dart';
 import 'service/race_service.dart';
 
 class Engine {
@@ -50,6 +51,10 @@ class Engine {
 
   void assignPlayerToCrew(final Crew crew) async {
     _raceService.assignPlayerToCrew(player, crew);
+  }
+
+  Future<Set<Crew>> getOpposingCrews(final Race race, final Session session) async {
+    _raceService.
   }
 
   static Engine get I => _instance!;

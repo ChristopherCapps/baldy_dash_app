@@ -36,7 +36,7 @@ class WaypointWidget extends StatelessWidget {
               ),
               trailing: Text(
                 '${_waypoint.region}',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

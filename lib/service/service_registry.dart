@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' as foundation;
 
 import '../firebase_options.dart';
+import 'crew_service.dart';
 import 'firestore_race_service.dart';
 import 'firestore_service.dart';
 import 'player_service.dart';
@@ -24,6 +25,7 @@ class ServiceRegistry extends foundation.ChangeNotifier {
   RaceService get raceService => _raceService;
 
   PlayerService get playerService => PlayerService.of(_raceService);
+  CrewService get crewService => CrewService.of(_raceService);
 
   static Future<ServiceRegistry> bootstrap() async {
     if (ServiceRegistry._instance != null) {

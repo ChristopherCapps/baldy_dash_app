@@ -204,27 +204,33 @@ class FirestoreRaceService implements RaceService {
   bool _stringNotNullOrEmpty(final String? str) =>
       str != null && str.isNotEmpty;
 
-  void _removePlayerFromCrew(final Player player,
+  void _removePlayerFromCrew(final Player player, final Crew currentCrew,
       {final Transaction? transaction}) async {
-    if (_stringNotNullOrEmpty(player.crewPath)) {
-      final currentCrew = await getCrewByPath(player.crewPath!);
-      // Remove player from current crew and then save
-      currentCrew.players.remove(player.id);
-      updateCrew(currentCrew, transaction: transaction);
-    }
+    // Remove player from current crew and then save
+    final updatedPlayers = Set<String>.from(currentCrew.players);
+    updatedPlayers.remove(player.id);
+    final updatedCrew = currentCrew.copyWith(players: updatedPlayers);
+    updateCrew(updatedCrew, transaction: transaction);
   }
 
   @override
-  void assignPlayerToCrew(final Player player, final Crew crew) async {
+  void assignPlayerToCrew(final Player player, final Crew newCrew) async {
+    final currentCrew = _stringNotNullOrEmpty(player.crewPath)
+        ? await getCrewByPath(player.crewPath!)
+        : null;
+
     await FirestoreService.I.runTransaction(
       (transaction) async {
-        _removePlayerFromCrew(player, transaction: transaction);
+        if (currentCrew != null) {
+          _removePlayerFromCrew(player, currentCrew, transaction: transaction);
+        }
         // Add player to new crew and then save
-        crew.players.add(player.id);
-        // todo: Consider crew.copyWith()
-        updateCrew(crew, transaction: transaction);
+        final updatedPlayers = Set<String>.from(newCrew.players);
+        updatedPlayers.add(player.id);
+        final updatedCrew = newCrew.copyWith(players: updatedPlayers);
+        updateCrew(updatedCrew, transaction: transaction);
         // Update the player's crew path and then save
-        final updatedPlayer = player.copyWith(crewPath: crew.path);
+        final updatedPlayer = player.copyWith(crewPath: newCrew.path);
         updatePlayer(updatedPlayer, transaction: transaction);
       },
     );
@@ -232,9 +238,15 @@ class FirestoreRaceService implements RaceService {
 
   @override
   void removePlayerFromCrew(final Player player) async {
+    final currentCrew = _stringNotNullOrEmpty(player.crewPath)
+        ? await getCrewByPath(player.crewPath!)
+        : null;
+
     await FirestoreService.I.runTransaction(
       (transaction) async {
-        _removePlayerFromCrew(player, transaction: transaction);
+        if (currentCrew != null) {
+          _removePlayerFromCrew(player, currentCrew, transaction: transaction);
+        }
         updatePlayer(player.copyWith(crewPath: ''), transaction: transaction);
       },
     );
@@ -266,33 +278,99 @@ class FirestoreRaceService implements RaceService {
     );
   }
 
-  @override
-  Future<Message> createMessage(
-      final Player fromPlayer, final String toPlayerId, final String text,
-      {final String? photoUrl}) async {
-    final decomposedCrewPath = getDecomposedCrewPath(fromPlayer.crewPath!);
-    final uuid = _getUniqueId();
-    final path = _messagePath(decomposedCrewPath.raceId,
-        decomposedCrewPath.sessionId, decomposedCrewPath.crewId, uuid);
+  // @override
+  // Future<Message> createMessage(
+  //     MessageSenderType messageSenderType,
+  //     MessageReceiverType messageReceiverType,
+  //     String receivingCrewPath,
+  //     String text,
+  //     {String? sendingPlayerId,
+  //     String? receivingPlayerId,
+  //     String? photoUrl}) async {
+  //       // start here
+  //   if (messageSenderType == MessageSenderType.player && sendingPlayerId == null) {
+  //     throw ArgumentError(
+  //       'A senderId must be provided when the sender type is player.',
+  //       'senderId',
+  //     );
+  //   }
 
-    return await _create(
-      _messagesPath(
-        decomposedCrewPath.raceId,
-        decomposedCrewPath.sessionId,
-        decomposedCrewPath.crewId,
-      ),
-      Message(
-        uuid,
-        path,
-        fromPlayerId: fromPlayer.id,
-        timestamp: DateTime.now(),
-        text: text,
-        toPlayerId: toPlayerId,
-        photoUrl: photoUrl,
-      ),
-      Message.toJson,
+  //   final receivingCrewId = switch (messageReceiverType) {
+  //     MessageReceiverType.crew => receiverId,
+  //     MessageReceiverType.player =>
+
+  //   }
+
+  //   final decomposedCrewPath = getDecomposedCrewPath(fromPlayer.crewPath!);
+  //   final uuid = _getUniqueId();
+  //   final path = _messagePath(decomposedCrewPath.raceId,
+  //       decomposedCrewPath.sessionId, decomposedCrewPath.crewId, uuid);
+
+  //   return await _create(
+  //     _messagesPath(
+  //       decomposedCrewPath.raceId,
+  //       decomposedCrewPath.sessionId,
+  //       decomposedCrewPath.crewId,
+  //     ),
+  //     Message(
+  //       uuid,
+  //       path,
+  //       fromPlayerId: fromPlayer.id,
+  //       timestamp: DateTime.now(),
+  //       text: text,
+  //       toPlayerId: toPlayerId,
+  //       photoUrl: photoUrl,
+  //     ),
+  //     Message.toJson,
+  //   );
+  // }
+
+  Message _createMessage(
+      final Race race,
+      final Session session,
+      final Crew receivingCrew,
+      final String text,
+      final MessageSenderType messageSenderType,
+      final MessageReceiverType messageReceiverType,
+      {final Player? sendingPlayer,
+      final String? receivingPlayerId,
+      final String? photoUrl}) {
+    final messageId = const Uuid().v1();
+    final messagePath = _messagePath(
+      race.id,
+      session.id,
+      receivingCrew.id,
+      messageId,
+    );
+    return Message(
+      messageId,
+      messagePath,
+      timestamp: DateTime.now(),
+      messageSenderType: MessageSenderType.player,
+      sendingPlayerId: sendingPlayer?.id,
+      text: text,
+      messageReceiverType: MessageReceiverType.crew,
     );
   }
+
+  Future<List<Crew>> _getCrews(final Race race, final Session session) =>
+      _getCollection(_crewsPath(race.id, session.id), Crew.fromJson);
+
+  @override
+  Future<void> sendTaunt(
+    final Player fromPlayer,
+    final Race race,
+    final Session session,
+    final Crew fromCrew,
+    final String text,
+  ) async =>
+      _getCrews(race, session).then((allCrewsInThisSession) =>
+          allCrewsInThisSession
+              .takeWhile((crew) => crew.id != fromCrew.id)
+              .forEach((crew) => _create(
+                  _messagesPath(race.id, session.id, crew.id),
+                  Message.now(fromPlayer.name, text),
+                  Message.toJson)));
 
   @override
   void updatePlayer(final Player player, {Transaction? transaction}) async {

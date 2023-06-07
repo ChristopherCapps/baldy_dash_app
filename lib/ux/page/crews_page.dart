@@ -105,15 +105,9 @@ class CrewsPage extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 18.0),
         child: const Column(
           children: [
-            // Text(
-            //   'Welcome!',
-            //   style: TextStyle(
-            //     fontSize: 18,
-            //     fontWeight: FontWeight.bold,
-            //   ),
-            // ),
             Text(
-              'Select a crew to join.',
+              'Select a crew to join.\nOnce the race begins, your crew cannot be changed.',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
                 fontStyle: FontStyle.italic,

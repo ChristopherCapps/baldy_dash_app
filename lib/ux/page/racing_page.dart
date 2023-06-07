@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../engine.dart';
+
 import '../../model/crew.dart';
 import '../../model/message.dart';
+import '../../model/player.dart';
 import '../../model/race.dart';
 import '../../model/session.dart';
 import '../../model/waypoint.dart';
@@ -14,18 +17,21 @@ import '../widget/message_widget.dart';
 import '../widget/waypoint_widget.dart';
 
 class RacingPage extends StatelessWidget {
+  final Engine _engine;
   final Stream<RacingSnapshotWithWaypoints> _racingSnapshots;
 
   RacingPage(
     final RacingSnapshot racingSnapshot, {
     Key? key,
   }) : this.custom(
+          Engine.I,
           ServiceRegistry.I.raceService,
           racingSnapshot,
           key: key,
         );
 
   RacingPage.custom(
+    this._engine,
     final RaceService raceService,
     final RacingSnapshot racingSnapshot, {
     super.key,
@@ -91,7 +97,7 @@ class RacingPage extends StatelessWidget {
                   snapshot.crew,
                   snapshot.waypoints,
                 ),
-                messagingWidget(context),
+                _messageListWidget(context, _engine.player, snapshot.crew),
               ],
             ),
           ),
@@ -120,15 +126,34 @@ class RacingPage extends StatelessWidget {
     Message(
       '1',
       '1',
-      fromPlayerId: '2',
+      sendingPlayerId: '1',
+      messageSenderType: MessageSenderType.player,
+      messageReceiverType: MessageReceiverType.player,
+      receivingPlayerId: '2',
       timestamp: DateTime.now(),
       text:
           'Our crew guesses \'rosebud\' for this clue. Are we right? I dont know but I want to see how long this text can get.',
     ),
   ];
 
-  Widget messagingWidget(final BuildContext context) => ListView.builder(
+  Widget _messageListWidget(
+          final BuildContext context, final Player player, final Crew crew) =>
+      ListView.builder(
         itemCount: _messages.length,
-        itemBuilder: (context, index) => MessageWidget(_messages[index]),
+        itemBuilder: (context, index) =>
+            _buildMessageWidget(context, player, crew, _messages[index]),
       );
+
+  Widget? _buildMessageWidget(final BuildContext context, final Player player,
+          final Crew crew, final Message message) =>
+      // We want to show the message in this player's feed ONLY if it was
+      // targeted to the player's crew, or if it was directly sent to the player
+      switch (message.messageReceiverType) {
+        MessageReceiverType.crew when message.receivingPlayerId == crew.id =>
+          MessageWidget(message),
+        MessageReceiverType.player
+            when message.receivingPlayerId == player.id =>
+          MessageWidget(message),
+        _ => null,
+      };
 }

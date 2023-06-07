@@ -1,25 +1,34 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
-import 'identity.dart';
-
 part 'message.g.dart';
 
 @JsonSerializable()
 @immutable
-class Message extends Identity {
-  final String fromPlayerId;
+class Message {
+  final String senderName;
   final DateTime timestamp;
   final String text;
-  final String? toPlayerId;
   final String? photoUrl;
+  final String? toPlayerId;
 
-  const Message(super.id, super.path,
-      {required this.fromPlayerId,
-      required this.timestamp,
-      required this.text,
-      this.toPlayerId,
-      this.photoUrl});
+  const Message(
+    this.senderName,
+    this.timestamp,
+    this.text, {
+    this.photoUrl,
+    this.toPlayerId,
+  });
+
+  Message.now(final String senderName, final String text,
+      {final String? photoUrl, final String? toPlayerId})
+      : this(
+          senderName,
+          DateTime.now(),
+          text,
+          photoUrl: photoUrl,
+          toPlayerId: toPlayerId,
+        );
 
   factory Message.fromJson(Map<String, dynamic> json) =>
       _$MessageFromJson(json);
@@ -29,11 +38,11 @@ class Message extends Identity {
 
   @override
   List<Object> get props => [
-        'fromPlayerId',
+        'senderName',
         'timestamp',
         'text',
-        'toPlayerId',
         'photoUrl',
+        'toPlayerId',
       ];
 
   @override

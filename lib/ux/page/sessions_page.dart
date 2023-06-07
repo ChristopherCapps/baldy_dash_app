@@ -101,6 +101,7 @@ class SessionsPage extends StatelessWidget {
               SessionState.pending: 'STARTING SOON',
               SessionState.running: 'HAPPENING NOW!'
             }[session.state]!,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           Text(switch (session.state) {
             SessionState.paused ||

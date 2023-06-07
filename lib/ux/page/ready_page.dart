@@ -28,6 +28,7 @@ class ReadyPage extends StatelessWidget {
         builder: (context, racingSnapshot) => Scaffold(
           appBar: AppBar(
             title: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text('Ready Room'),
                 Text(
@@ -41,34 +42,48 @@ class ReadyPage extends StatelessWidget {
           ),
           body: Container(
             padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 35.0),
+            alignment: Alignment.center,
             child: Column(
               children: [
-                Text({
-                  SessionState.completed: 'This race has ended.',
-                  SessionState.running: 'This race is currently running.',
-                  SessionState.paused: 'This race is currently paused.',
-                  SessionState.pending: 'This race is about to start.',
-                }[racingSnapshot.session.state]!),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: racingSnapshot.session.state ==
-                          SessionState.running
-                      ? () => Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                              builder: (context) => RacingPage(racingSnapshot)))
-                      : null,
-                  child: const Text('LET\'S GO!'),
+                Text(
+                  {
+                    SessionState.completed: 'This race has ended.',
+                    SessionState.running: 'Time to race!',
+                    SessionState.paused: 'This race is currently paused.',
+                    SessionState.pending: 'This race is about to start.\n'
+                        'When the it begins, the button below will light green.',
+                  }[racingSnapshot.session.state]!,
+                  textAlign: TextAlign.center,
                 ),
-                ElevatedButton(
-                  onPressed: racingSnapshot.session.state ==
-                          SessionState.pending
-                      ? () => Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => RacesPage()))
-                      : null,
-                  child: const Text('START OVER'),
+                const SizedBox(height: 15.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed:
+                          racingSnapshot.session.state == SessionState.running
+                              ? () => Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          RacingPage(racingSnapshot)))
+                              : null,
+                      child: const Text('LET\'S GO!'),
+                    ),
+                    const SizedBox(width: 15.0),
+                    ElevatedButton(
+                      onPressed:
+                          racingSnapshot.session.state == SessionState.pending
+                              ? () => Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) => RacesPage()))
+                              : null,
+                      child: const Text('START OVER'),
+                    ),
+                  ],
                 ),
               ],
             ),

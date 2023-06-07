@@ -19,10 +19,10 @@ class WelcomeNewcomerWidget extends StatelessWidget {
           title: const Text('Welcome, new Dasher!'),
         ),
         body: Container(
+          alignment: Alignment.center,
           padding: const EdgeInsets.only(left: 30.0, right: 30.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text(
                 'We\'re so glad you\'re here!',
@@ -33,7 +33,7 @@ class WelcomeNewcomerWidget extends StatelessWidget {
                 height: 15,
               ),
               const Text(
-                'To get started, we just need to know the name we\'ll use to address you. This will also be how you\'re mentioned to your crew and to the opposing crew.',
+                'To get started, we just need to know the name we\'ll use to address you.\n\nThis will also be how you\'re mentioned to your crew and to the opposing crew.',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(
@@ -42,7 +42,7 @@ class WelcomeNewcomerWidget extends StatelessWidget {
               NamePromptWidget(
                 onSubmitted: (name) async {
                   await _createNewPlayer(name);
-                  await Navigator.of(context).push(
+                  await Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (context) => _racesPage()),
                   );
                 },

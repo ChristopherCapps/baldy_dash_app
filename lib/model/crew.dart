@@ -44,6 +44,19 @@ class Crew extends Identity {
 
   @override
   bool get stringify => true;
+
+  Crew copyWith(
+          {String? name,
+          String? courseId,
+          String? waypointId,
+          Set<String>? players,
+          DateTime? completedTime}) =>
+      _Crew.copy(
+          from: this,
+          name: name,
+          courseId: courseId,
+          waypointId: waypointId,
+          players: players);
 }
 
 class _Crew extends Crew {
@@ -56,4 +69,36 @@ class _Crew extends Crew {
     required super.players,
     super.completedTime,
   }) : super._();
+
+  static Crew copy(
+          {required Crew from,
+          String? name,
+          String? courseId,
+          String? waypointId,
+          Set<String>? players,
+          dynamic completedTime = _Unset}) =>
+      _Crew(from.id, from.path,
+          name: name ?? from.name,
+          courseId: courseId ?? from.courseId,
+          waypointId: waypointId ?? from.waypointId,
+          players: players ?? from.players,
+          completedTime: completedTime == _Unset
+              ? from.completedTime
+              : completedTime as DateTime?);
+
+  @override
+  Crew copyWith(
+          {String? name,
+          String? courseId,
+          String? waypointId,
+          Set<String>? players,
+          DateTime? completedTime}) =>
+      _Crew.copy(
+          from: this,
+          name: name,
+          courseId: courseId,
+          waypointId: waypointId,
+          players: players);
 }
+
+class _Unset {}
