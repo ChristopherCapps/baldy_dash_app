@@ -7,6 +7,7 @@ import '../model/crew.dart';
 import '../model/message.dart';
 import '../model/player.dart';
 import '../model/race.dart';
+import '../model/racing_snapshot.dart';
 import '../model/session.dart';
 import '../model/waypoint.dart';
 import 'firestore_service.dart';
@@ -139,12 +140,12 @@ class FirestoreRaceService implements RaceService {
       _getCollectionStream(_sessionsPath(race.id), Session.fromJson);
 
   @override
-  Stream<List<Crew>> getSessionCrews(final Race race, final Session session) =>
-      _getCollectionStream(_crewsPath(race.id, session.id), Crew.fromJson);
+  Future<List<Crew>> getCrews(final Race race, final Session session) =>
+      _getCollection(_crewsPath(race.id, session.id), Crew.fromJson);
 
   @override
-  Future<List<Crew>> getSessionCrewsById(String raceId, String sessionId) =>
-      _getCollection(_crewsPath(raceId, sessionId), Crew.fromJson);
+  Stream<List<Crew>> getCrewsStream(final Race race, final Session session) =>
+      _getCollectionStream(_crewsPath(race.id, session.id), Crew.fromJson);
 
   @override
   Stream<Player> getPlayerStream() => _db
@@ -289,6 +290,12 @@ class FirestoreRaceService implements RaceService {
       );
 
   @override
+  Stream<List<Message>> getMessagesForCrew(
+          final Race race, final Session session, final Crew crew) =>
+      _getCollectionStream(
+          _messagesPath(race.id, session.id, crew.id), Message.fromJson);
+
+  @override
   Future<void> sendTaunt(
     final Player fromPlayer,
     final RacingSnapshot fromRacingSnapshot,
@@ -297,11 +304,15 @@ class FirestoreRaceService implements RaceService {
       _getCrews(fromRacingSnapshot.race, fromRacingSnapshot.session).then(
           (allCrewsInThisSession) => allCrewsInThisSession
               .where((crew) => crew.id != fromRacingSnapshot.crew.id)
-              .forEach((crew) => _create(
+              .forEach(
+                (crew) => _create<Message>(
                   _messagesPathForSnapshot(fromRacingSnapshot),
                   Message.now(fromPlayer.name, text),
-                  Message.toJson)));
+                  Message.toJson,
+                ),
+              ));
 
+  @override
   Future<Message> sendMessageFromGameMasterToPlayer(
     final Player toPlayer,
     final RacingSnapshot toRacingSnapshot,
@@ -316,6 +327,7 @@ class FirestoreRaceService implements RaceService {
         photoUrl: photoUrl,
       );
 
+  @override
   Future<Message> sendMessageFromRaceToPlayer(
     final Player toPlayer,
     final RacingSnapshot toRacingSnapshot,
@@ -337,7 +349,7 @@ class FirestoreRaceService implements RaceService {
     final String text, {
     final String? photoUrl,
   }) async =>
-      _create(
+      _create<Message>(
         _messagesPathForSnapshot(toRacingSnapshot),
         Message.now(
           senderName,
@@ -348,10 +360,10 @@ class FirestoreRaceService implements RaceService {
         Message.toJson,
       );
 
+  @override
   Future<Message> sendMessageFromRaceToCrew(
-          final RacingSnapshot toRacingSnapshot,
-          final String text,
-          final String? photoUrl) async =>
+          RacingSnapshot toRacingSnapshot, String text,
+          {String? photoUrl}) async =>
       _sendMessageToCrew(
         'BALDY DASH',
         toRacingSnapshot,
@@ -359,10 +371,10 @@ class FirestoreRaceService implements RaceService {
         photoUrl,
       );
 
+  @override
   Future<Message> sendMessageFromGameMasterToCrew(
-          final RacingSnapshot toRacingSnapshot,
-          final String text,
-          final String? photoUrl) async =>
+          RacingSnapshot toRacingSnapshot, String text,
+          {String? photoUrl}) async =>
       _sendMessageToCrew(
         'GAME MASTER',
         toRacingSnapshot,
@@ -375,7 +387,7 @@ class FirestoreRaceService implements RaceService {
           final RacingSnapshot toRacingSnapshot,
           final String text,
           final String? photoUrl) async =>
-      _create(
+      _create<Message>(
           _messagesPathForSnapshot(toRacingSnapshot),
           Message.now(
             senderName,
@@ -516,17 +528,21 @@ class FirestoreRaceService implements RaceService {
           );
 
   Stream<List<T>> _getCollectionStream<T>(
-          final String path, final JsonFactoryFunction<T> jsonFactoryFn,
-          {int? limit}) =>
-      _db.collection(path).limit(limit ?? 100).snapshots().map(
-            (snapshot) => snapshot.docs.fold<List<T>>(
-              [],
-              (documents, doc) => [
-                ...documents,
-                _deserializeDocument(doc, jsonFactoryFn),
-              ],
-            ),
-          );
+    final String path,
+    final JsonFactoryFunction<T> jsonFactoryFn, {
+    int? limit,
+  }) {
+    final query = _db.collection(path).limit(limit ?? 100);
+    return query.snapshots().map(
+          (snapshot) => snapshot.docs.fold<List<T>>(
+            [],
+            (documents, doc) => [
+              ...documents,
+              _deserializeDocument(doc, jsonFactoryFn),
+            ],
+          ),
+        );
+  }
 
   @override
   Stream<RacingSnapshot> getRacingStreamByRaceAndSessionAndCrew(

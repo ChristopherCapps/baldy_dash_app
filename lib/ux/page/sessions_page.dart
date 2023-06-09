@@ -119,8 +119,8 @@ class SessionsPage extends StatelessWidget {
 
   Container banner() => Container(
         padding: const EdgeInsets.only(bottom: 18.0),
-        child: Column(
-          children: const [
+        child: const Column(
+          children: [
             // Text(
             //   'Welcome!',
             //   style: TextStyle(

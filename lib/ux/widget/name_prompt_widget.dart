@@ -24,6 +24,7 @@ class _NamePromptWidget extends State<NamePromptWidget> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) => Column(
         children: [
           TextField(

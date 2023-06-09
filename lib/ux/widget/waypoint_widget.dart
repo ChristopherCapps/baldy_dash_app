@@ -5,8 +5,9 @@ import '../../model/waypoint.dart';
 @immutable
 class WaypointWidget extends StatelessWidget {
   final Waypoint _waypoint;
+  final void Function(String) _onResponse;
 
-  const WaypointWidget(this._waypoint, {super.key});
+  const WaypointWidget(this._waypoint, this._onResponse, {super.key});
 
   @override
   Widget build(BuildContext context) => Column(
@@ -85,7 +86,7 @@ class WaypointWidget extends StatelessWidget {
                 ),
                 const TextField(
                   decoration: InputDecoration(
-                    filled: true,
+                    //filled: true,
                     border: UnderlineInputBorder(),
                   ),
                   style: TextStyle(
@@ -99,8 +100,8 @@ class WaypointWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
+                      onPressed: _onResponse('tes'),
                       child: const Text('SUBMIT'),
-                      onPressed: () => {},
                     ),
                   ],
                 ),

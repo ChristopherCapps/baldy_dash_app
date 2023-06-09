@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
@@ -5,7 +6,7 @@ part 'message.g.dart';
 
 @JsonSerializable()
 @immutable
-class Message {
+class Message extends Equatable {
   final String senderName;
   final DateTime timestamp;
   final String text;

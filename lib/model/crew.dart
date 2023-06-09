@@ -102,3 +102,5 @@ class _Crew extends Crew {
 }
 
 class _Unset {}
+
+typedef DecomposedCrewPath = ({String raceId, String sessionId, String crewId});

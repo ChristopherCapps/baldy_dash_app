@@ -1,13 +1,19 @@
+import 'model/command.dart';
 import 'model/crew.dart';
 import 'model/player.dart';
-import 'model/session.dart';
 import 'model/race.dart';
+import 'model/racing_snapshot.dart';
+import 'model/session.dart';
+import 'service/message_service.dart';
 import 'service/race_service.dart';
 
 class Engine {
   static Engine? _instance;
 
-  static Future<Engine> initialize(final RaceService raceService) async {
+  static Future<Engine> initialize(
+    final RaceService raceService,
+    final MessageService messageService,
+  ) async {
     if (_instance != null) {
       return _instance!;
     }
@@ -22,9 +28,10 @@ class Engine {
   }
 
   final RaceService _raceService;
+  final MessageService _messageService;
   Player? _player;
 
-  Engine._(this._raceService) {
+  Engine._(this._raceService, this._messageService) {
     _raceService.getPlayerStream().listen(
           _onPlayerUpdated,
           onError: _onPlayerUpdateError,
@@ -53,9 +60,20 @@ class Engine {
     _raceService.assignPlayerToCrew(player, crew);
   }
 
-  Future<Set<Crew>> getOpposingCrews(final Race race, final Session session) async {
-    _raceService.
-  }
+  Future<Set<Crew>> getOpposingCrews(
+          final Race race, final Session session, final Crew crew) async =>
+      Set.from(
+        (await _raceService.getCrews(race, session))
+            .where((otherCrew) => crew.id != otherCrew.id),
+      );
+
+  void handleCommand(
+    final RacingSnapshotWithWaypoints racingSnapshotWithWaypoints,
+    final Command command,
+    final String args,
+  ) =>
+      command.onCommand(
+          this, _messageService, racingSnapshotWithWaypoints, args);
 
   static Engine get I => _instance!;
 }

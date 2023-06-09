@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../model/racing_snapshot.dart';
 import '../../model/session.dart';
 import '../../service/race_service.dart';
 import '../../service/service_registry.dart';

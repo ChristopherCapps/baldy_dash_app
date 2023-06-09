@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../engine.dart';
 
+import '../../model/command.dart';
 import '../../model/crew.dart';
 import '../../model/message.dart';
 import '../../model/player.dart';
 import '../../model/race.dart';
+import '../../model/racing_snapshot.dart';
 import '../../model/session.dart';
 import '../../model/waypoint.dart';
 
@@ -97,7 +99,7 @@ class RacingPage extends StatelessWidget {
                   snapshot.crew,
                   snapshot.waypoints,
                 ),
-                _messageListWidget(context, _engine.player, snapshot.crew),
+                _messageListWidget(context, _engine.player),
               ],
             ),
           ),
@@ -117,43 +119,70 @@ class RacingPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            WaypointWidget(waypoints[crew.waypointId]!),
+            WaypointWidget(
+                waypoints[crew.waypointId]!,
+                _onResponse((
+                  race: race,
+                  session: session,
+                  crew: crew,
+                  waypoints: waypoints,
+                ))),
           ],
         ),
       );
 
-  final List<Message> _messages = [
-    Message(
-      '1',
-      '1',
-      sendingPlayerId: '1',
-      messageSenderType: MessageSenderType.player,
-      messageReceiverType: MessageReceiverType.player,
-      receivingPlayerId: '2',
-      timestamp: DateTime.now(),
-      text:
-          'Our crew guesses \'rosebud\' for this clue. Are we right? I dont know but I want to see how long this text can get.',
-    ),
-  ];
+  void Function(String) _onResponse(
+          final RacingSnapshotWithWaypoints snapshotWithWaypoints) =>
+      (String response) => _engine.handleCommand(
+            snapshotWithWaypoints,
+            ResponseCommand(),
+            response,
+          );
 
-  Widget _messageListWidget(
-          final BuildContext context, final Player player, final Crew crew) =>
-      ListView.builder(
-        itemCount: _messages.length,
-        itemBuilder: (context, index) =>
-            _buildMessageWidget(context, player, crew, _messages[index]),
-      );
+  List<Message> buildMessages(final Player player) => [
+        Message.now(
+          player.name.toUpperCase(),
+          'Our crew guesses \'rosebud\' for this clue. Are we right? I dont know but I want to see how long this text can get.',
+        ),
+        Message.now(
+          'BALDY DASH',
+          'Sorry, Erin, but that\'s not the right answer! Try again.',
+          toPlayerId: player.id,
+        ),
+        Message.now(
+          'CARSON',
+          'Team Girls is going down!',
+        ),
+        Message.now(
+          player.name.toUpperCase(),
+          'Our crew guesses \'rosebud\' for this clue. Are we right? I dont know but I want to see how long this text can get.',
+        ),
+        Message.now(
+          'BALDY DASH',
+          'Erin sent a taunt to the other crews: "Oh just shut it Carson!"',
+          toPlayerId: player.id,
+        ),
+        Message.now(
+          'GAME MASTER',
+          'Don\'t make me pause the game for a sportsmanship lesson! :-P',
+          toPlayerId: player.id,
+        ),
+      ];
+
+  Widget _messageListWidget(final BuildContext context, final Player player) {
+    final messages = buildMessages(player);
+    return ListView.builder(
+      itemCount: messages.length,
+      itemBuilder: (context, index) =>
+          _buildMessageWidget(context, player, messages[index]),
+    );
+  }
 
   Widget? _buildMessageWidget(final BuildContext context, final Player player,
-          final Crew crew, final Message message) =>
+          final Message message) =>
       // We want to show the message in this player's feed ONLY if it was
       // targeted to the player's crew, or if it was directly sent to the player
-      switch (message.messageReceiverType) {
-        MessageReceiverType.crew when message.receivingPlayerId == crew.id =>
-          MessageWidget(message),
-        MessageReceiverType.player
-            when message.receivingPlayerId == player.id =>
-          MessageWidget(message),
-        _ => null,
-      };
+      message.toPlayerId == player.id || message.toPlayerId == null
+          ? MessageWidget(message)
+          : null;
 }

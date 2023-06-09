@@ -54,7 +54,7 @@ class CrewsPage extends StatelessWidget {
 
   AsyncBuilderTemplate<List<Crew>> crewsWidget() =>
       AsyncBuilderTemplate<List<Crew>>(
-        stream: raceService.getSessionCrews(race, session),
+        stream: raceService.getCrewsStream(race, session),
         builder: (context, crews) {
           if (crews!.isEmpty) {
             return const Text('No crews are available for this race.');

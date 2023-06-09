@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../engine.dart';
 import '../../model/player.dart';
+import '../../model/racing_snapshot.dart';
 import '../../model/session.dart';
 import '../../service/race_service.dart';
 import '../../service/service_registry.dart';
@@ -123,7 +124,7 @@ class WelcomeBackWidget extends StatelessWidget {
         children: [
           const SizedBox(height: 20.0),
           const Text(
-              'It looks like you were last running this race, which is still underway!'),
+              'It looks like you were last running this race, which is still underway! \u{1F3C1}'),
           const SizedBox(height: 15.0),
           _buildRaceTileWidget(context, racingSnapshot),
           const SizedBox(height: 15.0),

@@ -3,6 +3,7 @@ import '../model/crew.dart';
 import '../model/message.dart';
 import '../model/player.dart';
 import '../model/race.dart';
+import '../model/racing_snapshot.dart';
 import '../model/session.dart';
 import '../model/waypoint.dart';
 
@@ -19,9 +20,9 @@ abstract class RaceService {
 
   Stream<Session> getSessionStreamById(String raceId, String sessionId);
 
-  Stream<List<Crew>> getSessionCrews(Race race, Session session);
+  Future<List<Crew>> getCrews(Race race, Session session);
 
-  Future<List<Crew>> getSessionCrewsById(String raceId, String sessionId);
+  Stream<List<Crew>> getCrewsStream(Race race, Session session);
 
   Future<Crew> getCrewById(String raceId, String sessionId, String crewId);
 
@@ -46,10 +47,35 @@ abstract class RaceService {
   Stream<Map<String, Waypoint>> getWaypoints(Race race, Course course);
 
   Future<void> sendTaunt(
-    final Player fromPlayer,
-    final RacingSnapshot fromRacingSnapshot,
-    final String text,
+    Player fromPlayer,
+    RacingSnapshot fromRacingSnapshot,
+    String text,
   );
+
+  Future<Message> sendMessageFromGameMasterToPlayer(
+    Player toPlayer,
+    RacingSnapshot toRacingSnapshot,
+    String text, {
+    String? photoUrl,
+  });
+
+  Future<Message> sendMessageFromRaceToPlayer(
+    Player toPlayer,
+    RacingSnapshot toRacingSnapshot,
+    String text, {
+    String? photoUrl,
+  });
+
+  Future<Message> sendMessageFromRaceToCrew(
+      RacingSnapshot toRacingSnapshot, String text,
+      {String? photoUrl});
+
+  Future<Message> sendMessageFromGameMasterToCrew(
+      RacingSnapshot toRacingSnapshot, String text,
+      {String? photoUrl});
+
+  Stream<List<Message>> getMessagesForCrew(
+      Race race, Session session, Crew crew);
 
   void updatePlayer(Player player);
 
@@ -82,14 +108,3 @@ abstract class RaceService {
     String courseId,
   );
 }
-
-typedef DecomposedCrewPath = ({String raceId, String sessionId, String crewId});
-
-typedef RacingSnapshot = ({Race race, Session session, Crew crew});
-
-typedef RacingSnapshotWithWaypoints = ({
-  Race race,
-  Session session,
-  Crew crew,
-  Map<String, Waypoint> waypoints,
-});

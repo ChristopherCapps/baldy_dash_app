@@ -10,7 +10,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final serviceRegistry = await ServiceRegistry.bootstrap();
   print('Loaded settings: ${serviceRegistry.settings.uuid}');
-  final engine = await Engine.initialize(ServiceRegistry.I.raceService);
+  final engine = await Engine.initialize(
+    ServiceRegistry.I.raceService,
+    ServiceRegistry.I.messageService,
+  );
   print('Initialized Engine for player: ${engine.player}');
 
   return runApp(
