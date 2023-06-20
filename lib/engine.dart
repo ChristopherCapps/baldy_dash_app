@@ -18,7 +18,7 @@ class Engine {
       return _instance!;
     }
 
-    final engine = Engine._(raceService);
+    final engine = Engine._(raceService, messageService);
     _instance = engine;
 
     // Make sure there's an initial value here before completing initialization

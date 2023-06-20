@@ -85,6 +85,9 @@ abstract class RaceService {
 
   Stream<Set<String>> getPlayersForCrew(Race race, Session session, Crew crew);
 
+  Stream<List<Message>> getMessagesStream(
+      Race race, Session session, Crew crew);
+
   Stream<List<Message>> getMessagesStreamById(
     String raceId,
     String sessionId,

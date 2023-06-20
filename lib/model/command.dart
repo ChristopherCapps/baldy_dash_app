@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 import '../../service/message_service.dart';
 import '../engine.dart';
 import 'crew.dart';

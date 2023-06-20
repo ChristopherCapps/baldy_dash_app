@@ -166,6 +166,7 @@ class FirestoreRaceService implements RaceService {
           final Race race, final Session session, final Crew crew) =>
       getCrewStreamById(race.id, session.id, crew.id);
 
+  @override
   Stream<List<Message>> getMessagesStream(
           final Race race, final Session session, final Crew crew) =>
       getMessagesStreamById(race.id, session.id, crew.id);
@@ -199,7 +200,9 @@ class FirestoreRaceService implements RaceService {
       _getCollectionStream(
         _messagesPath(raceId, sessionId, crewId),
         Message.fromJson,
-        limit: limit,
+        queryFn: <T>(query) => query
+            .orderBy('timestamp', descending: false)
+            .limitToLast(limit ?? 20),
       );
 
   bool _stringNotNullOrEmpty(final String? str) =>
@@ -365,7 +368,7 @@ class FirestoreRaceService implements RaceService {
           RacingSnapshot toRacingSnapshot, String text,
           {String? photoUrl}) async =>
       _sendMessageToCrew(
-        'BALDY DASH',
+        'BALDY DASH (WAYPOINT ${toRacingSnapshot.crew.waypointId})',
         toRacingSnapshot,
         text,
         photoUrl,
@@ -530,10 +533,12 @@ class FirestoreRaceService implements RaceService {
   Stream<List<T>> _getCollectionStream<T>(
     final String path,
     final JsonFactoryFunction<T> jsonFactoryFn, {
+    Query<T> Function<T>(Query<T>)? queryFn,
     int? limit,
   }) {
-    final query = _db.collection(path).limit(limit ?? 100);
-    return query.snapshots().map(
+    final baseQuery = _db.collection(path).limit(limit ?? 100);
+    final finalQuery = queryFn != null ? queryFn(baseQuery) : baseQuery;
+    return finalQuery.snapshots().map(
           (snapshot) => snapshot.docs.fold<List<T>>(
             [],
             (documents, doc) => [

@@ -3,11 +3,35 @@ import 'package:flutter/material.dart';
 import '../../model/waypoint.dart';
 
 @immutable
-class WaypointWidget extends StatelessWidget {
+class WaypointWidget extends StatefulWidget {
   final Waypoint _waypoint;
-  final void Function(String) _onResponse;
+  final ValueChanged<String> _onResponse;
 
   const WaypointWidget(this._waypoint, this._onResponse, {super.key});
+
+  @override
+  State<WaypointWidget> createState() => _WaypointWidget();
+}
+
+class _WaypointWidget extends State<WaypointWidget> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onSubmitted(final String text) {
+    _controller.clear();
+    widget._onResponse(text);
+  }
 
   @override
   Widget build(BuildContext context) => Column(
@@ -30,13 +54,13 @@ class WaypointWidget extends StatelessWidget {
                     width: 8,
                   ),
                   Text(
-                    _waypoint.id,
+                    widget._waypoint.id,
                     style: const TextStyle(fontSize: 36),
                   ),
                 ],
               ),
               trailing: Text(
-                '${_waypoint.region}',
+                '${widget._waypoint.region}',
                 style: const TextStyle(
                   fontSize: 12,
                   color: Colors.white,
@@ -64,7 +88,7 @@ class WaypointWidget extends StatelessWidget {
                   height: 15.0,
                 ),
                 Text(
-                  _waypoint.clue,
+                  widget._waypoint.clue,
                   style: const TextStyle(
                     fontSize: 18.0,
                   ),
@@ -84,12 +108,14 @@ class WaypointWidget extends StatelessWidget {
                 const SizedBox(
                   height: 15.0,
                 ),
-                const TextField(
-                  decoration: InputDecoration(
+                TextField(
+                  controller: _controller,
+                  onSubmitted: _onSubmitted,
+                  decoration: const InputDecoration(
                     //filled: true,
                     border: UnderlineInputBorder(),
                   ),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                   ),
                 ),
@@ -100,7 +126,7 @@ class WaypointWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
-                      onPressed: _onResponse('tes'),
+                      onPressed: () => _onSubmitted(_controller.text),
                       child: const Text('SUBMIT'),
                     ),
                   ],

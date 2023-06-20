@@ -15,12 +15,13 @@ import '../../service/race_service.dart';
 import '../../service/service_registry.dart';
 
 import '../widget/async_builder_template.dart';
-import '../widget/message_widget.dart';
+import '../widget/messages_listview_widget.dart';
 import '../widget/waypoint_widget.dart';
 
 class RacingPage extends StatelessWidget {
   final Engine _engine;
   final Stream<RacingSnapshotWithWaypoints> _racingSnapshots;
+  final Stream<List<Message>> _messages;
 
   RacingPage(
     final RacingSnapshot racingSnapshot, {
@@ -37,12 +38,17 @@ class RacingPage extends StatelessWidget {
     final RaceService raceService,
     final RacingSnapshot racingSnapshot, {
     super.key,
-  }) : _racingSnapshots = raceService
+  })  : _racingSnapshots = raceService
             .getRacingStreamWithWaypointsByRaceAndSessionAndCrewAndCourse(
           racingSnapshot.race.id,
           racingSnapshot.session.id,
           racingSnapshot.crew.id,
           racingSnapshot.crew.courseId,
+        ),
+        _messages = raceService.getMessagesStream(
+          racingSnapshot.race,
+          racingSnapshot.session,
+          racingSnapshot.crew,
         );
 
   @override
@@ -99,7 +105,7 @@ class RacingPage extends StatelessWidget {
                   snapshot.crew,
                   snapshot.waypoints,
                 ),
-                _messageListWidget(context, _engine.player),
+                _messagesWidget(context, _engine.player),
               ],
             ),
           ),
@@ -169,20 +175,9 @@ class RacingPage extends StatelessWidget {
         ),
       ];
 
-  Widget _messageListWidget(final BuildContext context, final Player player) {
-    final messages = buildMessages(player);
-    return ListView.builder(
-      itemCount: messages.length,
-      itemBuilder: (context, index) =>
-          _buildMessageWidget(context, player, messages[index]),
-    );
-  }
-
-  Widget? _buildMessageWidget(final BuildContext context, final Player player,
-          final Message message) =>
-      // We want to show the message in this player's feed ONLY if it was
-      // targeted to the player's crew, or if it was directly sent to the player
-      message.toPlayerId == player.id || message.toPlayerId == null
-          ? MessageWidget(message)
-          : null;
+  Widget _messagesWidget(final BuildContext context, final Player player) =>
+      Container(
+        padding: const EdgeInsets.only(bottom: 20.0),
+        child: MessagesListViewWidget(player, _messages),
+      );
 }
